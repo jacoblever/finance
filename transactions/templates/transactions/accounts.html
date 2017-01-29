@@ -1,0 +1,22 @@
+{% extends "transactions/template.html" %}
+
+{% block content %}
+	<table border="1">
+  		<tr>
+			<th>Account Name</td>
+			<th>Account Type</td>
+			<th>Account Number</td>
+			<th>SortCode</td>
+			<th>Active</td>
+		</tr>
+		{% for account in object_list %}
+	  		<tr>
+				<td>{{ account.AccountHumanName }}</td>
+				<td>{{ account.AccountType }}</td>
+				<td>{{ account.AccountNumber }}</td>
+				<td>{{ account.SortCode }}</td>
+				<td>{{ account.IsActive }}</td>
+			</tr>
+		{% endfor %}
+	<table>
+{% endblock %}

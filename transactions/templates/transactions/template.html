@@ -1,0 +1,64 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<title>Finance</title>
+		<meta charset="utf-8" />
+		<link rel="stylesheet" type="text/css" href="{% static "transactions/rome.css" %}">
+		<script type="text/javascript" src="{% static "transactions/rome.js" %}"></script>
+		<script type="text/javascript" src="{% static "transactions/jquery-3.1.1.js" %}"></script>
+		<style>
+			ul.list-nav {
+			    list-style-type: none;
+			    margin: 0;
+			    padding: 0;
+			    overflow: hidden;
+			}
+
+			ul.list-nav > li {
+			    float: left;
+				padding: 5px;
+			}
+			
+			ul.filter-ul {
+			    list-style-type: none;
+			    margin: 0;
+			    padding: 0;
+			    overflow: hidden;
+				border: 1px black solid;
+			}
+
+			ul.filter-ul > li {
+			    float: left;
+				padding: 10px;
+			}
+
+			ul.filter-ul > li > label {
+				display: block;
+			}
+
+			.table {
+				border-collapse: collapse;
+			}
+
+			.table td {
+				padding: 4px;
+			}
+		</style>
+	</head>
+	<body>
+		<nav class="nav">
+			<ul class="list-nav">
+				<li><a href="/transactions/">Home</a></li>
+				<li><a href="/transactions/upload/">Upload</a></li>
+				<li><a href="/transactions/past-uploads/">Past Uploads</a></li>
+				<li><a href="/transactions/graph/">Graph</a></li>
+				<li><a href="/transactions/past-uploads/">Past Uploads</a></li>
+			</ul>
+		</nav>
+		<div class='container-fluid'>
+		   {% block content %}
+		   {% endblock %}	
+		</div>	  	
+	</body>
+</html>

@@ -1,0 +1,194 @@
+{% extends "transactions/template.html" %}
+
+{% block content %}
+	<form filter-form method="GET">
+		<ul class="filter-ul">
+			{{ view.getFilterForm.as_ul }}
+			<li>
+				<br>
+				<button type="submit">Filter</button>
+				<button type="button" download-button>Download All</button>
+			</li>
+		</ul>
+	</form>
+	<ul  class="filter-ul" bulk-form>
+		<li>Bulk Edit (this will change all the items below)</li>
+		{{ bulkForm.as_ul }}
+		<li><button reset-button>Reset</button></li>
+	</ul>
+	<div>
+		<button type="submit">Save</button>
+		
+		<div style="float: right">
+			{% if page == None %}
+				Showing all items - <a href="javascript:gotoPage(1);">Use pageination</a>
+			{% else %}
+				{% if page != 1 %}
+					<a href="javascript:gotoPage({{ page|add:"-1" }});"><-</a>
+				{% endif %}
+				<select class="page-select" onchange="gotoPage(this.value)">
+				{% for i in pages %}
+					{% if i == page %}
+						<option value={{ i }} selected>{{ i }}</option>
+					{% else %}
+						<option value={{ i }}>{{ i }}</option>	
+					{% endif %}
+				{% endfor %}
+				</select>
+				of {{ pages|last }}
+				{% if page != pages|last %}
+					<a href="javascript:gotoPage({{ page|add:"1"}});">-></a>
+				{% endif %}
+				 - <a href="javascript:gotoPage('all');">Show all</a>
+			{% endif %}
+		</div>
+	</div>
+	<form method="POST" action="./save-labels/" transactions-form>{% csrf_token %}		
+		<table class="table" border="2">
+	  		<tr>
+				<th>Account</th>
+				<th>Date</th>
+				{% if singleAccount != None %}
+					{% if singleAccount.OtherDate1Name != None %}
+						<th>{{ singleAccount.OtherDate1Name }}</th>
+					{% endif %}
+					{% if singleAccount.OtherString1Name != None %}
+						<th>{{ singleAccount.OtherString1Name }}</th>
+					{% endif %}
+				{% endif %}
+				<th>Description</th>
+				<th>Amount</th>
+				<th>Label</th>
+				<th>Notes</th>
+			</tr>
+			{% for transaction in object_list %}
+		  		<tr>
+					<td>
+						<input
+							type="hidden"
+							name="id"
+							value="{{ transaction.0.id }}" />
+						{{ transaction.0.Account }}
+					</td>
+					<td>{{ transaction.0.Date|date:"d M Y" }}</td>
+					{% if singleAccount != None %}
+						{% if singleAccount.OtherDate1Name != None %}
+							<td>{{ transaction.0.OtherDate1|date:"d M Y" }}</td>
+						{% endif %}
+						{% if singleAccount.OtherString1Name != None %}
+							<td>{{ transaction.0.OtherString1 }}</td>
+						{% endif %}
+					{% endif %}
+					<td>{{ transaction.0.Description }}</td>
+					<td>{{ transaction.0.Amount }}</td>
+					<td>
+						{{ transaction.1.Label }}
+					</td>
+					<td>
+						{{ transaction.1.Notes }}
+					</td>
+				</tr>
+			{% endfor %}
+		</table>
+		<button type="submit">Save</button>
+	</form>
+	<script>
+		rome(document.getElementById('id_date_from'),{inputFormat: "YYYY-MM-DD"});
+		rome(document.getElementById('id_date_to'),{inputFormat: "YYYY-MM-DD"});
+		
+		$('button[download-button]').click(function(){
+			var values = $('[filter-form]').serialize();
+			window.location.href = './download/?' + values;
+		});
+		
+		var $transactionsForm = $('[transactions-form]');
+		
+		$('[bulk-form]').find(':input').change(function(event){
+			var namePostfix = $(event.target).attr('name');
+			var $inputs = $transactionsForm.find(':input[name$="' + namePostfix + '"]');
+			$inputs.val($(event.target).val()).change();
+		});
+		
+		$transactionsForm.find(':input').change(function(e) {
+			$(this).attr('changed', 'true');
+		});
+		
+		function gotoPage(i) {
+			window.location = updateQueryString("page", i == 1 ? null : i);
+		}
+		
+		window.onbeforeunload = function(){
+			if($transactionsForm.find(':input[changed=true]').length > 0) {
+				return true;
+			}
+		};
+		
+		$('button[reset-button]').click(function(event) {
+			// It's safe to repload now
+			window.onbeforeunload = null;
+			window.location.reload();
+		});
+		
+		$transactionsForm.submit(function() {
+			var data = $transactionsForm.find('input[name=csrfmiddlewaretoken]').serializeArray()
+
+			var test = $transactionsForm.find(':input[changed=true]');
+			test.parents('tr').each(function(i, tr) {
+				var thisData = $(tr).find(':input').serializeArray();
+				for(var i = 0; i < thisData.length; i++) {
+					data.push(thisData[i]);
+				}
+			});
+			
+			console.log();
+			var rowCount = data.filter(function(x){return x.name === 'id'}).length;
+			console.log('Saving ' + rowCount + ' transactions...');
+			var startTime = performance.now();
+			
+			$.ajax({
+				type: $transactionsForm.attr('method'),
+			 	url:  $transactionsForm.attr('action'),
+				data:  data
+			}).done(function(data) {
+				var endTime = performance.now();
+				console.log('Saved taking ' + (endTime-startTime)/1000 + ' ms.');
+				console.log('Reloading...');
+				setTimeout(function(){
+					// It's safe to repload now
+					window.onbeforeunload = null;
+					window.location.reload();
+				}, 500);
+			});
+			return false;
+		});
+		
+		function updateQueryString(key, value) {
+		    var url = window.location.href;
+		    var re = new RegExp("([?&])" + key + "=.*?(&|#|$)(.*)", "gi"),
+		        hash;
+
+		    if (re.test(url)) {
+		        if (typeof value !== 'undefined' && value !== null) {
+		            return url.replace(re, '$1' + key + "=" + value + '$2$3');
+		        } else {
+		            hash = url.split('#');
+		            url = hash[0].replace(re, '$1$3').replace(/(&|\?)$/, '');
+		            if (typeof hash[1] !== 'undefined' && hash[1] !== null) 
+		                url += '#' + hash[1];
+		            return url;
+		        }
+		    } else {
+		        if (typeof value !== 'undefined' && value !== null) {
+		            var separator = url.indexOf('?') !== -1 ? '&' : '?';
+		            hash = url.split('#');
+		            url = hash[0] + separator + key + '=' + value;
+		            if (typeof hash[1] !== 'undefined' && hash[1] !== null) 
+		                url += '#' + hash[1];
+		            return url;
+		        } else {
+		            return url;
+				}
+		    }
+		}
+	</script>
+{% endblock %}

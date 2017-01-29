@@ -1,0 +1,40 @@
+{% extends "transactions/template.html" %}
+
+{% block content %}
+	{% csrf_token %}
+	<table class="table" border="2">
+  		<tr>
+			<th>Date Uploaded</th>
+			<th>Count</th>
+			<th></th>
+		</tr>
+		{% for account in object_list %}
+	  		<tr>
+				<td>{{ account.0 }}</td>
+				<td>{{ account.1 }}</td>
+				<td><button value="{{ account.2 }}" text-date="{{ account.0 }}">Delete</button></td>
+			</tr>
+		{% endfor %}
+	</table>
+	<script>
+		$("button").click(function(e){
+			var textDate = $(this).attr("text-date");
+			if(confirm("Do you really want to delete the items uploaded on " + textDate + "?")) {
+				$.ajax({
+					type: "POST",
+				 	url:  './delete/',
+					data: {
+						datetime: encodeURI($(this).attr("value")),
+						csrfmiddlewaretoken: $('input[name=csrfmiddlewaretoken]').val()
+					}
+				}).done(function(data) {
+					window.location.reload();
+				}).fail(function(data) {
+					var newDoc = document.open("text/html", "replace");
+					newDoc.write("<pre>" + data.responseText + "</pre>");
+					newDoc.close();
+				});
+			}
+		});
+	</script>
+{% endblock %}
