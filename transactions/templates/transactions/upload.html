@@ -10,14 +10,15 @@
 	</form>
 	
 	<script>
-		var $uploadForm = $('form[upload-form]');
-		var accountSelect = $uploadForm.find("select[name=account]");
-		var fileInput = $uploadForm.find("input[name=file]");
-		var uploadButton = $uploadForm.find("[upload-button]");
+		var uploadForm = $('form[upload-form]');
+		var accountSelect = uploadForm.find("select[name=account]");
+		var fileInput = uploadForm.find("input[name=file]");
+		var uploadButton = uploadForm.find("[upload-button]");
 		
 		var onInputChange = function(){
-			if(accountSelect.val() !== "" && fileInput.val() !== "") {
-				$uploadForm.submit();
+			uploadForm.find("input[name=actually-upload]").remove();
+			if(fileInput.val() !== "") {
+				uploadForm.submit();
 			} else {
 				$("[upload-preview]").empty();
 			}
@@ -26,12 +27,12 @@
 		accountSelect.change(onInputChange);
 		fileInput.change(onInputChange);
 		
-		$uploadForm.submit(function() {
+		uploadForm.submit(function() {
 			uploadButton[0].disabled = true;
 			$.ajax({
-				type: $uploadForm.attr('method'),
-			 	url:  $uploadForm.attr('action'),
-				data:  new FormData($uploadForm[0]),
+				type: uploadForm.attr('method'),
+			 	url:  uploadForm.attr('action'),
+				data:  new FormData(uploadForm[0]),
             	cache: false,
             	contentType: false,
             	processData: false

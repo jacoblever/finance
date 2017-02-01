@@ -55,3 +55,10 @@ class TransactionFilterForm(forms.Form):
     def isPaged(self):
         return self.data.get('page') != "all"
 
+class ManualForm(forms.ModelForm):
+    class Meta:
+        model = BankTransaction
+        fields = ('Date','Description','Amount','Label','Notes')
+        widgets = {
+            'Date': forms.DateInput(attrs={'class':'datepicker'}),
+        }

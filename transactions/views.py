@@ -2,9 +2,11 @@ from django.shortcuts import render, redirect
 from django.http import HttpResponse, HttpResponseRedirect
 from django.views.generic import ListView
 from django.db.models import Count
+from datetime import datetime
+from django.core.urlresolvers import reverse
 
 from transactions.models import BankTransaction
-from .forms import UploadForm, TransactionFilterForm, TransactionForm
+from .forms import UploadForm, TransactionFilterForm, TransactionForm, ManualForm
 from .models import BankAccount
 from .src.upload import uploadTransactions
 from .src.filter import applyFilter
@@ -24,17 +26,41 @@ def upload(request):
                 request,
                 'transactions/upload-result.html',
                 {'totalCount': output[0],
-                 'potentialDuplicates': None})
+                 'potentialDuplicates': None,
+                 'existingCount': output[2],
+                 'problems': []})
         else:
             output = uploadTransactions(form, actuallyUpload)
             return render(
                 request,
                 'transactions/upload-result.html',
                 {'totalCount': output[0],
-                 'potentialDuplicates': output[1]})
+                 'potentialDuplicates': output[1],
+                 'existingCount': output[2],
+                 'problems': output[3]})
     else:
         form = UploadForm()
         return render(request, 'transactions/upload.html', {'form': form})
+
+def manual(request, id=None):
+    existing = BankTransaction.objects.get(pk=id) if id != None else None
+    if existing != None and existing.Account.id != -1:
+        raise Exception('You sould not be editing an imported transaction')
+    if request.method != 'POST':
+        form = ManualForm(instance=existing)
+        return render(request, 'transactions/manual.html', {'form': form})
+    else:
+        if request.POST.get('delete') == 'true':
+            existing.delete()
+        else:
+            form = ManualForm(request.POST, instance=existing)
+            transaction = form.save(commit=False)
+            if existing == None:
+                transaction.Account = BankAccount.objects.get(pk=-1)
+                transaction.DateUploaded = datetime.now()
+            transaction.save()
+        returnUrl = request.POST.get('return-url')
+        return redirect(returnUrl if returnUrl != '' else reverse('home'))
 
 class TransactionsView(ListView):
     template_name="transactions/index.html"
@@ -68,10 +94,10 @@ class TransactionsView(ListView):
             context['singleAccount'] = None
 
         context['bulkForm'] = TransactionForm()
-
+        context['totalFound'] = len(applyFilter(form))
         if form.isPaged():
             context['page'] = form.getPage()
-            totalPages = math.ceil(len(applyFilter(form))/self.pageSize)
+            totalPages = math.ceil(context['totalFound']/self.pageSize)
             context['pages'] = range(1, totalPages + 1)
         return context
 

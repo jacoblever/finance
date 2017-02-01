@@ -1,8 +1,24 @@
+{% load useful_tags %}
+{% if problems|length > 0 %}
+	<h2>
+		There were {{ problems|length }} problem(s) with the upload. <a href="../">Back</a>
+	</h2>
+	<ul>
+		{% for problem in problems %}
+			<li>{{ problem }}</li>
+		{% endfor %}
+	</ul>
+{% endif %}
 {% if potentialDuplicates == None %}
 	<h2>
-		{{ totalCount }} transactions uploaded. <a href="../">Back</a>
+		{{ totalCount|subtract:existingCount }} new transactions uploaded. {{ existingCount }} updated - <a href="../">Back</a>
 	</h2>
-{% elif potentialDuplicates|length > 0 %}
+{% elif potentialDuplicates|length == 0 %}
+	<h2>
+		{{ totalCount }} transactions found. {{ existingCount }} of which are updates. No potential duplicates.
+	</h2>
+	<input type="hidden" name="actually-upload" value="true" />
+{% else %}
 	<h2>
 		{{ totalCount }} transactions found. The following {{ potentialDuplicates|length }} transactions already exist in the database and appear to be the same as transactions you are trying to upload (although they may be for a different account).
 	</h2>
@@ -27,9 +43,4 @@
 		{% endfor %}
 	<table>
 	<input type="checkbox" name="actually-upload" value="true" id="actually-upload" /><label for="actually-upload">Upload anyway</label>
-{% else %}
-	<h2>
-		{{ totalCount }} transactions found. No potential duplicates.
-	</h2>
-	<input type="hidden" name="actually-upload" value="true" />
 {% endif %}

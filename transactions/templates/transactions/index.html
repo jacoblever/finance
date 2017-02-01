@@ -1,4 +1,5 @@
 {% extends "transactions/template.html" %}
+{% load useful_tags %}
 
 {% block content %}
 	<form filter-form method="GET">
@@ -20,10 +21,12 @@
 		<button type="submit">Save</button>
 		
 		<div style="float: right">
+			{{ totalFound }} transactions - 
 			{% if page == None %}
 				Showing all items - <a href="javascript:gotoPage(1);">Use pageination</a>
 			{% else %}
 				{% if page != 1 %}
+					<a href="javascript:gotoPage(1);"><<-</a>
 					<a href="javascript:gotoPage({{ page|add:"-1" }});"><-</a>
 				{% endif %}
 				<select class="page-select" onchange="gotoPage(this.value)">
@@ -37,7 +40,8 @@
 				</select>
 				of {{ pages|last }}
 				{% if page != pages|last %}
-					<a href="javascript:gotoPage({{ page|add:"1"}});">-></a>
+					<a href="javascript:gotoPage({{ page|add:"1" }});">-></a>
+					<a href="javascript:gotoPage({{ pages|last }});">->></a>
 				{% endif %}
 				 - <a href="javascript:gotoPage('all');">Show all</a>
 			{% endif %}
@@ -58,6 +62,7 @@
 				{% endif %}
 				<th>Description</th>
 				<th>Amount</th>
+				<th></th>
 				<th>Label</th>
 				<th>Notes</th>
 			</tr>
@@ -70,10 +75,10 @@
 							value="{{ transaction.0.id }}" />
 						{{ transaction.0.Account }}
 					</td>
-					<td>{{ transaction.0.Date|date:"d M Y" }}</td>
+					<td>{{ transaction.0.Date|nice_date }}</td>
 					{% if singleAccount != None %}
 						{% if singleAccount.OtherDate1Name != None %}
-							<td>{{ transaction.0.OtherDate1|date:"d M Y" }}</td>
+							<td>{{ transaction.0.OtherDate1|nice_date }}</td>
 						{% endif %}
 						{% if singleAccount.OtherString1Name != None %}
 							<td>{{ transaction.0.OtherString1 }}</td>
@@ -81,6 +86,11 @@
 					{% endif %}
 					<td>{{ transaction.0.Description }}</td>
 					<td>{{ transaction.0.Amount }}</td>
+					<td>
+						{% if transaction.0.Account.id == -1 %}
+							<a href="./manual/{{ transaction.0.id }}">Edit</a>
+						{% endif %}
+					</td>
 					<td>
 						{{ transaction.1.Label }}
 					</td>
@@ -98,7 +108,7 @@
 		
 		$('button[download-button]').click(function(){
 			var values = $('[filter-form]').serialize();
-			window.location.href = './download/?' + values;
+			window.location.href = './download/?page=all&' + values;
 		});
 		
 		var $transactionsForm = $('[transactions-form]');

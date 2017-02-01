@@ -1,0 +1,14 @@
+{% extends "transactions/template.html" %}
+
+{% block content %}
+	<h1>Manual</h1>
+	<form method="POST">{% csrf_token %}
+		{{ form.as_p }}
+		<input type="hidden" name="return-url" value="{{ request.META.HTTP_REFERER }}">
+		<button type="submit">Save</button>
+		<button name="delete" value="true" type="submit">Delete</button>
+	</form>
+	<script>
+		rome(document.getElementById('id_Date'),{inputFormat: "YYYY-MM-DD"});
+	</script>
+{% endblock %}
