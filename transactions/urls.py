@@ -10,15 +10,15 @@ from . import views
 urlpatterns = [
     url(r'^$', TransactionsView.as_view(), name='home'),
     url(r'^download/$', TransactionsDownloadView.as_view()),
-    url(r'^save-labels/$', views.saveLabels, name='same-labels'),
+    url(r'^save-labels/$', views.saveLabels),
     url(r'^accounts/$', ListView.as_view(queryset=BankAccount.objects.all(),
                                 template_name="transactions/accounts.html")),
-    url(r'^upload/$', views.upload, name='upload-s'),
-    url(r'^manual/$', views.manual, name='manual'),
-    url(r'^manual/(?P<id>\w+)/$', views.manual, name='manual'),
-    url(r'^graph-week-data/$', views.graph, name='graph'),
+    url(r'^upload/$', views.upload),
+    url(r'^manual/$', views.manual),
+    url(r'^manual/(?P<id>\w+)/$', views.manual),
+    url(r'^graph-week-data/$', views.graph),
     url(r'^graph/$', ListView.as_view(queryset=BankAccount.objects.all(),
                                 template_name="transactions/graph2.html")),
     url(r'^past-uploads/$', PastUploadsView.as_view()),
-    url(r'^past-uploads/delete/$', views.deletePastUploads, name='delete-past-uploads')
+    url(r'^past-uploads/delete/$', views.deletePastUploads)
 ]

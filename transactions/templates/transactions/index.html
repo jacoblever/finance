@@ -12,7 +12,7 @@
 			</li>
 		</ul>
 	</form>
-	<ul  class="filter-ul" bulk-form>
+	<ul class="filter-ul" bulk-form>
 		<li>Bulk Edit (this will change all the items below)</li>
 		{{ bulkForm.as_ul }}
 		<li><button reset-button>Reset</button></li>
@@ -48,7 +48,7 @@
 		</div>
 	</div>
 	<form method="POST" action="./save-labels/" transactions-form>{% csrf_token %}		
-		<table class="table" border="2">
+		<table class="table">
 	  		<tr>
 				<th>Account</th>
 				<th>Date</th>
