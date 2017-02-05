@@ -22,7 +22,7 @@
 	<h2>
 		{{ totalCount }} transactions found. The following {{ potentialDuplicates|length }} transactions already exist in the database and appear to be the same as transactions you are trying to upload (although they may be for a different account).
 	</h2>
-	<table class="transactions-table" border="2">
+	<table class="table">
 		<tr>
 			<th>Account</th>
 			<th>Date</th>
@@ -34,7 +34,7 @@
 		{% for transaction in potentialDuplicates %}
 	  		<tr duplicate-transaction>
 				<td>{{ transaction.Account }}</td>
-				<td>{{ transaction.Date }}</td>
+				<td>{{ transaction.Date|nice_date }}</td>
 				<td>{{ transaction.Description }}</td>
 				<td>{{ transaction.Amount }}</td>
 				<td>{{ transaction.Label }}</td>
