@@ -8,7 +8,7 @@ def uploadTransactions(form, actuallyUpload):
     TransactionIdCol = 'TransactionId'
     AccountIdCol = 'AccountId'
     
-    text = TextIOWrapper(form.getFile().file, encoding='utf-8')
+    text = TextIOWrapper(form.getFile().file, encoding='ISO-8859-1')
     spamreader = csv.DictReader(text)
     duplicates = BankTransaction.objects.none()
     duplicatesSoFar = list(BankTransaction.objects.none())
