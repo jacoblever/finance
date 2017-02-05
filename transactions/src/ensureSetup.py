@@ -9,7 +9,7 @@ def getManualAccount():
         return newItem
 
 manual = getManualAccount()
-manual.AccountHumanName = 'Manual2'
+manual.AccountHumanName = 'Manual'
 manual.AccountType = 'CurrentAccount'
 manual.AccountNumber = ''
 manual.SortCode = ''
