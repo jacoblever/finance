@@ -1,24 +1,5 @@
 from transactions.models import BankAccount, TransactionLabel
 
-manual = BankAccount()
-manual.id = -1
-manual.AccountHumanName = 'Manual'
-manual.AccountType = 'CurrentAccount'
-manual.AccountNumber = ''
-manual.SortCode = ''
-manual.IsActive = True
-
-manual.ColumnDate = "datetime.strptime(row['Date'], '%d %b %Y')"
-manual.ColumnDescription = "row['Description']"
-manual.ColumnAmount = "float(row['Amount'])"
-manual.ColumnCurrentBalance = "None"
-manual.OtherDate1Name = None
-manual.ColumnOtherDate1 = "None"
-manual.OtherString1Name = None
-manual.ColumnOtherString1 = "None"
-
-manual.save()
-
 halifaxCredit = BankAccount()
 halifaxCredit.AccountHumanName = 'Halifax Credit'
 halifaxCredit.AccountType = 'CreditCard'
