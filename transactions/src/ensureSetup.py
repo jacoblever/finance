@@ -26,3 +26,14 @@ manual.ColumnOtherString1 = "None"
 
 manual.save()
 
+def getTransferLabel():
+    try:
+        return TransactionLabel.objects.get(pk=-1)
+    except TransactionLabel.DoesNotExist:
+        newItem = TransactionLabel()
+        newItem.id = -1
+        return newItem
+
+transfer = getTransferLabel()
+transfer.Name = 'Transfer'
+transfer.save()
