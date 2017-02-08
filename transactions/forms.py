@@ -37,7 +37,7 @@ class TransactionFilterForm(forms.Form):
         widget = AdminDateWidget,
         input_formats=settings.DATE_INPUT_FORMATS,
         required=False,)
-    description = forms.CharField(
+    text = forms.CharField(
         required=False,)
 
     def getAccount(self):
@@ -48,8 +48,8 @@ class TransactionFilterForm(forms.Form):
         return self['date_from'].value()
     def getDateTo(self):
         return self['date_to'].value()
-    def getDescription(self):
-        return self['description'].value()
+    def getText(self):
+        return self['text'].value()
     def getPage(self):
         return int(self.data.get('page')) if self.data.get('page') != None else 1
     def isPaged(self):

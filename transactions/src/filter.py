@@ -28,7 +28,7 @@ def applyFilter(form):
     transactions = mathes(transactions, lambda x: x.Account_id, form.getAccount())
     transactions = mathesDate(transactions, lambda x, date: x.Date >= date, form.getDateFrom())
     transactions = mathesDate(transactions, lambda x, date: x.Date <= date, form.getDateTo())
-    text = form.getDescription()
+    text = form.getText()
     if text != None and text != '':
         transactions = [x for x in transactions if mathesText(x, text)]
     sortedTransactions = sorted(transactions, key=lambda x: x.Date)
