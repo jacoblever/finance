@@ -5,9 +5,13 @@
 	<form filter-form method="GET">
 		<ul class="filter-ul">
 			{{ view.getFilterForm.as_ul }}
+			{% if page == None %}
+				<input type="hidden" name="page" value="all">
+			{% endif %}
 			<li>
 				<br>
 				<button type="submit">Filter</button>
+				<button type="button" clear-filter-button>Clear Filter</button>
 				<button type="button" download-button>Download All</button>
 			</li>
 		</ul>
@@ -109,6 +113,15 @@
 		$('button[download-button]').click(function(){
 			var values = $('[filter-form]').serialize();
 			window.location.href = './download/?page=all&' + values;
+		});
+		
+		$('button[clear-filter-button]').click(function(){
+			var pageInput = $(this).closest("form").find("input[name=page]");
+			if(pageInput.length > 0 && pageInput.val() === "all"){
+				window.location.href = './?page=all';
+			} else {
+				window.location.href = './';
+			}
 		});
 		
 		var $transactionsForm = $('[transactions-form]');
