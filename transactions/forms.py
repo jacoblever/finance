@@ -26,8 +26,8 @@ class TransactionFilterForm(forms.Form):
     account = forms.ModelMultipleChoiceField(
         queryset=BankAccount.objects.all(),
         required=False,)
-    label = forms.ModelMultipleChoiceField(
-        queryset=TransactionLabel.objects.all(),
+    label = forms.MultipleChoiceField(
+        choices=[(x.id,x.Name) for x in ([TransactionLabel.create("(Blank)",0)]+list(TransactionLabel.objects.all()))],
         required=False,)
     date_from = forms.DateField(
         widget = AdminDateWidget,

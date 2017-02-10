@@ -32,23 +32,25 @@ class BankAccount(models.Model):
         max_length=100,
         null=True,
         blank=True,)
-    
+
     def __str__(self):
         return self.AccountHumanName
 
 class TransactionLabel(models.Model):
-    
+
     Name = models.CharField(max_length=255)
 
     def __str__(self):
         return self.Name
 
     @classmethod
-    def create(cls, name):
+    def create(cls, name, thisId = None):
         label = cls()
         label.Name = name
+        if thisId is not None:
+            label.id = thisId
         return label
-    
+
 class BankTransaction(models.Model):
     Account = models.ForeignKey(
         BankAccount,
