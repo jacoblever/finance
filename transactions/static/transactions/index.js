@@ -1,6 +1,16 @@
 rome(document.getElementById('id_date_from'),{inputFormat: "YYYY-MM-DD"});
 rome(document.getElementById('id_date_to'),{inputFormat: "YYYY-MM-DD"});
 
+$('ul.filter-ul').find('li').each(function(i, item){
+    var li = $(item);
+    var x = $('<a href="javascript:0">X</a>')
+    li.find('label').append(" ").append(x);
+    x.click(function(e){
+        li.find(':input').val("");
+        li.find(':input').focus();
+    });
+});
+
 $('button[download-button]').click(function(){
     var values = $('[filter-form]').serialize();
     window.location.href = './download/?page=all&' + values;
