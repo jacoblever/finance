@@ -1,7 +1,7 @@
 rome(document.getElementById('id_date_from'),{inputFormat: "YYYY-MM-DD"});
 rome(document.getElementById('id_date_to'),{inputFormat: "YYYY-MM-DD"});
 
-$('ul.filter-ul').find('li').each(function(i, item){
+$('form[filter-form]').find('li').each(function(i, item){
     var li = $(item);
     var x = $('<a href="javascript:0">X</a>')
     li.find('label').append(" ").append(x);
