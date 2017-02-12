@@ -54,6 +54,9 @@ $('button[reset-button]').click(function(event) {
 });
 
 $transactionsForm.submit(function() {
+
+    $("body").append("<div class='saving-overlay'>Saving...</div>");
+
     var data = $transactionsForm.find('input[name=csrfmiddlewaretoken]').serializeArray()
 
     var test = $transactionsForm.find(':input[changed=true]');
@@ -64,7 +67,6 @@ $transactionsForm.submit(function() {
         }
     });
 
-    console.log();
     var rowCount = data.filter(function(x){return x.name === 'id'}).length;
     console.log('Saving ' + rowCount + ' transactions...');
     var startTime = performance.now();
