@@ -22,37 +22,37 @@
 		{{ bulkForm.as_ul }}
 		<li><button reset-button>Reset</button></li>
 	</ul>
-	<div>
-		<button type="submit">Save</button>
-		
-		<div style="float: right">
-			{{ totalFound }} transactions - 
-			{% if page == None %}
-				Showing all items - <a href="javascript:gotoPage(1);">Use pageination</a>
-			{% else %}
-				{% if page != 1 %}
-					<a href="javascript:gotoPage(1);"><<-</a>
-					<a href="javascript:gotoPage({{ page|add:"-1" }});"><-</a>
-				{% endif %}
-				<select class="page-select" onchange="gotoPage(this.value)">
-				{% for i in pages %}
-					{% if i == page %}
-						<option value={{ i }} selected>{{ i }}</option>
-					{% else %}
-						<option value={{ i }}>{{ i }}</option>	
+	<form method="POST" action="./save-labels/" transactions-form>{% csrf_token %}
+		<div>
+			<button type="submit">Save</button>
+
+			<div style="float: right">
+				{{ totalFound }} transactions -
+				{% if page == None %}
+					Showing all items - <a href="javascript:gotoPage(1);">Use pageination</a>
+				{% else %}
+					{% if page != 1 %}
+						<a href="javascript:gotoPage(1);"><<-</a>
+						<a href="javascript:gotoPage({{ page|add:"-1" }});"><-</a>
 					{% endif %}
-				{% endfor %}
-				</select>
-				of {{ pages|last }}
-				{% if page != pages|last %}
-					<a href="javascript:gotoPage({{ page|add:"1" }});">-></a>
-					<a href="javascript:gotoPage({{ pages|last }});">->></a>
+					<select class="page-select" onchange="gotoPage(this.value)">
+					{% for i in pages %}
+						{% if i == page %}
+							<option value={{ i }} selected>{{ i }}</option>
+						{% else %}
+							<option value={{ i }}>{{ i }}</option>
+						{% endif %}
+					{% endfor %}
+					</select>
+					of {{ pages|last }}
+					{% if page != pages|last %}
+						<a href="javascript:gotoPage({{ page|add:"1" }});">-></a>
+						<a href="javascript:gotoPage({{ pages|last }});">->></a>
+					{% endif %}
+					 - <a href="javascript:gotoPage('all');">Show all</a>
 				{% endif %}
-				 - <a href="javascript:gotoPage('all');">Show all</a>
-			{% endif %}
+			</div>
 		</div>
-	</div>
-	<form method="POST" action="./save-labels/" transactions-form>{% csrf_token %}		
 		<table class="table">
 	  		<tr>
 				<th>Account</th>
