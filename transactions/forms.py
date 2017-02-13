@@ -2,6 +2,7 @@ from django import forms
 from transactions.models import BankAccount, BankTransaction, TransactionLabel
 from django.contrib.admin.widgets import AdminDateWidget
 from django.conf import settings
+from django.db.utils import OperationalError
 
 class UploadForm(forms.Form):
     account = forms.ModelChoiceField(queryset=BankAccount.objects.all())
@@ -23,11 +24,21 @@ class TransactionForm(forms.ModelForm):
         fields = ('Label','Notes')
 
 class TransactionFilterForm(forms.Form):
+
+    @staticmethod
+    def getLabelOptions():
+        try:
+            return [(x.id,x.Name) for x in ([TransactionLabel.create("(Blank)",0)]+list(TransactionLabel.objects.all()))]
+        except OperationalError:
+            # When running makemigrations for the first time this will raise a OperationalError
+            # We should ignore it
+            return []
+
     account = forms.ModelMultipleChoiceField(
         queryset=BankAccount.objects.all(),
         required=False,)
     label = forms.MultipleChoiceField(
-        choices=[(x.id,x.Name) for x in ([TransactionLabel.create("(Blank)",0)]+list(TransactionLabel.objects.all()))],
+        choices=getLabelOptions.__func__(),
         required=False,)
     date_from = forms.DateField(
         widget = AdminDateWidget,
