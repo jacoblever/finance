@@ -1,6 +1,6 @@
 import csv
 from io import TextIOWrapper
-from transactions.models import BankAccount, BankTransaction, TransactionLabel
+from transactions.models import BankAccount, BankTransaction, TransactionLabel, AccountTemplate
 from datetime import datetime
 from decimal import Decimal
 
@@ -27,7 +27,7 @@ def uploadTransactions(form, actuallyUpload):
             id = int(row[TransactionIdCol])
             transaction = BankTransaction.objects.get(pk=id)
             newTemp = BankTransaction()
-            populateBankTransactionInfo(newTemp, row, getReimportAccount())
+            populateBankTransactionInfo(newTemp, row, getReimportAccountTemplate())
             if transaction.Account.id != int(row['AccountId']):
                 problems.append(str(id) + ": Account id changed " + str(transaction.Account.id) + " != " + row['AccountId'])
             for problem in checkBankTransactionInfoConsistency(transaction, newTemp):
@@ -41,7 +41,7 @@ def uploadTransactions(form, actuallyUpload):
                 problems.append("Could not parse transaction: Please select an account")
             else:
                 try:
-                    populateBankTransactionInfo(transaction, row, account)
+                    populateBankTransactionInfo(transaction, row, account.Template)
                 except Exception as e:
                     problems.append("Could not parse transaction: '" + str(e) + "'")
 
@@ -82,25 +82,25 @@ def test(problems, t1, t2, lam):
     if lam(t1) != lam(t2):
         problems.append("'" + str(lam(t1))  + "' != '" + str(lam(t2) + "'"))
 
-def getReimportAccount():
-    account = BankAccount()
+def getReimportAccountTemplate():
+    template = AccountTemplate()
 
-    account.ColumnDate = "datetime.strptime(row['Date'], '%d %b %Y')"
-    account.ColumnDescription = "row['Description']"
-    account.ColumnAmount = "Decimal(row['Amount'])"
-    account.ColumnCurrentBalance = "None if row['CurrentBalance'] == '' else Decimal(row['CurrentBalance'])"
-    account.ColumnOtherDate1 = "None if row['OtherDate1'] == '' else datetime.strptime(row['OtherDate1'], '%d %b %Y')"
-    account.ColumnOtherString1 = "row['OtherString1']"
+    template.DateGetter = "datetime.strptime(row['Date'], '%d %b %Y')"
+    template.DescriptionGetter = "row['Description']"
+    template.AmountGetter = "Decimal(row['Amount'])"
+    template.CurrentBalanceGetter = "None if row['CurrentBalance'] == '' else Decimal(row['CurrentBalance'])"
+    template.OtherDate1Getter = "None if row['OtherDate1'] == '' else datetime.strptime(row['OtherDate1'], '%d %b %Y')"
+    template.OtherString1Getter = "row['OtherString1']"
 
-    return account
+    return template
 
-def populateBankTransactionInfo(transaction, row, account):
-    transaction.Date = eval(account.ColumnDate)
-    transaction.Description = eval(account.ColumnDescription)
-    transaction.Amount = eval(account.ColumnAmount)
-    transaction.CurrentBalance = eval(account.ColumnCurrentBalance)
-    transaction.OtherDate1 = eval(account.ColumnOtherDate1)
-    transaction.OtherString1 = eval(account.ColumnOtherString1)
+def populateBankTransactionInfo(transaction, row, template):
+    transaction.Date = eval(template.DateGetter)
+    transaction.Description = eval(template.DescriptionGetter)
+    transaction.Amount = eval(template.AmountGetter)
+    transaction.CurrentBalance = eval(template.CurrentBalanceGetter)
+    transaction.OtherDate1 = eval(template.OtherDate1Getter)
+    transaction.OtherString1 = eval(template.OtherString1Getter)
 
 def populateMetaTransactionInfo(transaction, row, labels):
     LabelCol = 'Label'
