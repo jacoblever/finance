@@ -1,5 +1,5 @@
 from django import forms
-from transactions.models import BankAccount, BankTransaction, TransactionLabel
+from transactions.models import BankAccount, BankTransaction, TransactionLabel, AccountTemplate
 from django.contrib.admin.widgets import AdminDateWidget
 from django.conf import settings
 from django.db.utils import OperationalError
@@ -30,7 +30,7 @@ class TransactionFilterForm(forms.Form):
         try:
             return [(x.id,x.Name) for x in ([TransactionLabel.create("(Blank)",0)]+list(TransactionLabel.objects.all()))]
         except OperationalError:
-            # When running makemigrations for the first time this will raise a OperationalError
+            # When running makemigrations for the first time this will raise an OperationalError
             # We should ignore it
             return []
 
@@ -72,4 +72,51 @@ class ManualForm(forms.ModelForm):
         fields = ('Date','Description','Amount','Label','Notes')
         widgets = {
             'Date': forms.DateInput(attrs={'class':'datepicker'}),
+        }
+
+class BankAccountForm(forms.ModelForm):
+
+    @staticmethod
+    def getAccountTemplateOptions():
+        try:
+            return [('',"---------")]\
+                   +[(x.id,x.Name) for x in AccountTemplate.objects.all().filter(IsBuiltIn__exact=True)] \
+                   +[('custom',"Custom...")]
+        except OperationalError:
+            # When running makemigrations for the first time this will raise an OperationalError
+            # We should ignore it
+            return []
+
+    template = forms.ChoiceField(
+        choices=getAccountTemplateOptions.__func__())
+
+    class Meta:
+        model = BankAccount
+        fields = ('AccountHumanName', 'AccountType', 'AccountNumber', 'SortCode', 'IsActive', 'template')
+
+class AccountTemplateForm(forms.ModelForm):
+    has_balance = forms.BooleanField(required=False)
+    has_other_date_1 = forms.BooleanField(required=False)
+    has_other_string_1 = forms.BooleanField(required=False)
+    class Meta:
+        model = AccountTemplate
+        fields = (
+            'DateGetter',
+            'DescriptionGetter',
+            'AmountGetter',
+            'has_balance',
+            'CurrentBalanceGetter',
+            'has_other_date_1',
+            'OtherDate1Name',
+            'OtherDate1Getter',
+            'has_other_string_1',
+            'OtherString1Name',
+            'OtherString1Getter',
+        )
+        widgets = {
+            'CurrentBalanceGetter': forms.TextInput(attrs={'required': ''}),
+            'OtherDate1Name': forms.TextInput(attrs={'required': ''}),
+            'OtherDate1Getter': forms.TextInput(attrs={'required': ''}),
+            'OtherString1Name': forms.TextInput(attrs={'required': ''}),
+            'OtherString1Getter': forms.TextInput(attrs={'required': ''}),
         }

@@ -3,20 +3,29 @@
 {% block content %}
 	<table class="table">
   		<tr>
-			<th>Account Name</td>
-			<th>Account Type</td>
-			<th>Account Number</td>
-			<th>SortCode</td>
-			<th>Active</td>
+			<th>Account Name</th>
+			<th>Account Type</th>
+			<th>Account Number</th>
+			<th>SortCode</th>
+			<th>Active</th>
+			<th>Template</th>
 		</tr>
 		{% for account in object_list %}
 	  		<tr>
-				<td>{{ account.AccountHumanName }}</td>
+				<td><a href="./{{ account.id }}/">{{ account.AccountHumanName }}</a></td>
 				<td>{{ account.AccountType }}</td>
 				<td>{{ account.AccountNumber }}</td>
 				<td>{{ account.SortCode }}</td>
 				<td>{{ account.IsActive }}</td>
+				<td>
+					{% if account.Template.IsBuiltIn %}
+						{{ account.Template }}
+					{% else %}
+						Custom
+					{% endif %}
+				</td>
 			</tr>
 		{% endfor %}
 	</table>
+	<a href="./new/">New Account</a>
 {% endblock %}

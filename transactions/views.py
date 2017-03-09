@@ -6,11 +6,12 @@ from datetime import datetime
 from django.core.urlresolvers import reverse
 
 from transactions.models import BankTransaction
-from .forms import UploadForm, TransactionFilterForm, TransactionForm, ManualForm
-from .models import BankAccount
+from .forms import UploadForm, TransactionFilterForm, TransactionForm, ManualForm, BankAccountForm, AccountTemplateForm
+from .models import BankAccount, AccountTemplate
 from .src.upload import uploadTransactions
 from .src.filter import applyFilter
 from .src.graph import makeGraph
+import uuid
 
 import urllib
 import math
@@ -48,7 +49,10 @@ def manual(request, id=None):
         raise Exception('You sould not be editing an imported transaction')
     if request.method != 'POST':
         form = ManualForm(instance=existing)
-        return render(request, 'transactions/manual.html', {'form': form})
+        return render(
+            request,
+            'transactions/manual.html',
+            {'form': form, 'addingNewTransaction': id is None})
     else:
         if request.POST.get('delete') == 'true':
             existing.delete()
@@ -61,6 +65,50 @@ def manual(request, id=None):
             transaction.save()
         returnUrl = request.POST.get('return-url')
         return redirect(returnUrl if returnUrl != '' else reverse('home'))
+
+def editAccount(request, id=None):
+    bankAccount = BankAccount.objects.get(pk=id) if id != None else None
+    if id != None and bankAccount.id < 0:
+        raise Exception('You should not be editing a built in account')
+    originalHasCustomTemplate = bankAccount is not None and not bankAccount.Template.IsBuiltIn
+    customAccountTemplate = bankAccount.Template if originalHasCustomTemplate else None
+    if request.method != 'POST':
+        templateId = "custom" if originalHasCustomTemplate else\
+            (bankAccount.Template.id if bankAccount is not None else "")
+        accountForm = BankAccountForm(initial={'template': templateId}, instance=bankAccount)
+        templateForm = AccountTemplateForm(instance=customAccountTemplate)
+        return render(
+            request,
+            'transactions/edit_account.html',
+            {
+                'accountForm': accountForm,
+                'addingNewAccount': id is None,
+                'templateForm': templateForm
+            })
+    else:
+        if request.POST.get('delete') == 'true':
+            template = bankAccount.Template
+            bankAccount.delete()
+            if not template.IsBuiltIn:
+                template.delete()
+        else:
+            accountForm = BankAccountForm(request.POST, instance=bankAccount)
+            resultHasCustomTemplate = request.POST.get('template') == 'custom'
+            if resultHasCustomTemplate:
+                templateForm = AccountTemplateForm(request.POST, instance=customAccountTemplate)
+                customAccountTemplate = templateForm.save(commit=False)
+                if customAccountTemplate.Name == '':
+                    customAccountTemplate.Name = uuid.uuid4()
+                customAccountTemplate.save()
+
+            bankAccount = accountForm.save(commit=False)
+            bankAccount.Template = customAccountTemplate if resultHasCustomTemplate\
+                else AccountTemplate.objects.get(pk=request.POST.get('template'))
+            bankAccount.save()
+
+            if originalHasCustomTemplate and not resultHasCustomTemplate:
+                customAccountTemplate.delete()
+        return redirect(reverse('accounts'))
 
 class TransactionsView(ListView):
     template_name="transactions/index.html"

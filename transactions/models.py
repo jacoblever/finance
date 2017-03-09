@@ -13,21 +13,34 @@ class AccountTemplate(models.Model):
     DateGetter = models.CharField(max_length=100)
     DescriptionGetter = models.CharField(max_length=100)
     AmountGetter = models.CharField(max_length=100)
-    CurrentBalanceGetter = models.CharField(max_length=100)
+
+    CurrentBalanceGetter = models.CharField(
+        max_length=100,
+        null=True,
+        blank=True,
+    )
 
     OtherDate1Name = models.CharField(
         max_length=100,
         null=True,
         blank=True,
     )
-    OtherDate1Getter = models.CharField(max_length=100)
+    OtherDate1Getter = models.CharField(
+        max_length=100,
+        null=True,
+        blank=True,
+    )
 
     OtherString1Name = models.CharField(
         max_length=100,
         null=True,
         blank=True,
     )
-    OtherString1Getter = models.CharField(max_length=100)
+    OtherString1Getter = models.CharField(
+        max_length=100,
+        null=True,
+        blank=True,
+    )
 
     def __str__(self):
         return self.Name
@@ -45,7 +58,7 @@ class BankAccount(models.Model):
         null=True,
         blank=True,
     )
-    IsActive = models.BooleanField()
+    IsActive = models.BooleanField(default=True)
 
     Template = models.ForeignKey(
         AccountTemplate,
@@ -73,7 +86,7 @@ class TransactionLabel(models.Model):
 class BankTransaction(models.Model):
     Account = models.ForeignKey(
         BankAccount,
-        on_delete=models.CASCADE,
+        on_delete=models.PROTECT,
     )
     Date = models.DateField()
     Description  = models.CharField(max_length=255)

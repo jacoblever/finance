@@ -7,7 +7,7 @@ from decimal import Decimal
 def uploadTransactions(form, actuallyUpload):
     TransactionIdCol = 'TransactionId'
     AccountIdCol = 'AccountId'
-    
+
     text = TextIOWrapper(form.getFile().file, encoding='ISO-8859-1')
     spamreader = csv.DictReader(text)
     duplicates = BankTransaction.objects.none()
@@ -34,7 +34,7 @@ def uploadTransactions(form, actuallyUpload):
                 problems.append(str(id) + ": " + problem)
             existingTransaction = True
             existingCount += 1
-        else:           
+        else:
             transaction.Account = account
             transaction.DateUploaded = now
             if account == None:
@@ -64,7 +64,7 @@ def uploadTransactions(form, actuallyUpload):
             if count % 50 == 0:
                 duplicatesSoFar = duplicatesSoFar + list(duplicates)
                 duplicates = BankTransaction.objects.none()
-    
+
     duplicatesSoFar = duplicatesSoFar + list(duplicates)
     return (count, list(duplicatesSoFar), existingCount, problems)
 
@@ -94,20 +94,27 @@ def getReimportAccountTemplate():
 
     return template
 
+############################################################
+# Note: Do not remove the row parameter, it must exist in
+# the scope the getters are run
+############################################################
 def populateBankTransactionInfo(transaction, row, template):
     transaction.Date = eval(template.DateGetter)
     transaction.Description = eval(template.DescriptionGetter)
     transaction.Amount = eval(template.AmountGetter)
-    transaction.CurrentBalance = eval(template.CurrentBalanceGetter)
-    transaction.OtherDate1 = eval(template.OtherDate1Getter)
-    transaction.OtherString1 = eval(template.OtherString1Getter)
+    transaction.CurrentBalance = eval(template.CurrentBalanceGetter)\
+        if template.CurrentBalanceGetter is not None else None
+    transaction.OtherDate1 = eval(template.OtherDate1Getter)\
+        if template.OtherDate1Getter is not None else None
+    transaction.OtherString1 = eval(template.OtherString1Getter)\
+        if template.OtherString1Getter is not None else None
 
 def populateMetaTransactionInfo(transaction, row, labels):
     LabelCol = 'Label'
     NotesCol = 'Notes'
 
     transaction.Notes = ''
-    
+
     if LabelCol in row:
         labelText = row[LabelCol]
         if(labelText != None and labelText != ''):

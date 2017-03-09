@@ -1,0 +1,27 @@
+{% extends "transactions/template.html" %}
+{% load static %}
+
+{% block content %}
+	<h1>
+		{% if addingNewAccount %}
+			Add Account
+		{% else %}
+			Edit Account
+		{% endif %}
+	</h1>
+	<form method="POST">{% csrf_token %}
+		<table class="table">
+			<tbody>
+				{{ accountForm.as_table }}
+			</tbody>
+			<tbody custom-template-table>
+				{{ templateForm.as_table }}
+			</tbody>
+		</table>
+		<button type="submit">Save</button>
+		{% if addingNewAccount == False %}
+			<button name="delete" value="true" type="submit">Delete</button>
+		{% endif %}
+	</form>
+	<script type="text/javascript" src="{% static 'transactions/edit_account.js' %}"></script>
+{% endblock %}
