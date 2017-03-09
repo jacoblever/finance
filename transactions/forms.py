@@ -35,7 +35,7 @@ class TransactionFilterForm(forms.Form):
             return []
 
     account = forms.ModelMultipleChoiceField(
-        queryset=BankAccount.objects.all(),
+        queryset=BankAccount.objects.all().filter(IsActive__exact=True),
         required=False,)
     label = forms.MultipleChoiceField(
         choices=getLabelOptions.__func__(),
