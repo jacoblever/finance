@@ -1,3 +1,3 @@
-{% load useful_tags %}TransactionId,Account,AccountId,Date,Description,Amount,Label,Notes,CurrentBalance,OtherDate1,OtherString1
-{% for transaction in object_list %}{{ transaction.0.id }},{{ transaction.0.Account }},{{ transaction.0.Account.id }},{{ transaction.0.Date|nice_date }},"{{ transaction.0.Description|safe }}",{{ transaction.0.Amount }},{{ transaction.0.Label|not_none }},"{{ transaction.0.Notes|not_none|safe }}",{{ transaction.0.CurrentBalance|not_none }},{{ transaction.0.OtherDate1|nice_date }},"{{ transaction.0.OtherString1|not_none }}"
+{% load useful_tags %}TransactionId,Account,AccountId,Date,Description,Amount,Label,Notes,CurrentBalance,CustomDate1,CustomText1
+{% for transaction in object_list %}{{ transaction.0.id }},{{ transaction.0.bank_account }},{{ transaction.0.bank_account.id }},{{ transaction.0.date|nice_date }},"{{ transaction.0.description|safe }}",{{ transaction.0.amount }},{{ transaction.0.transaction_label|not_none }},"{{ transaction.0.notes|not_none|safe }}",{{ transaction.0.current_balance|not_none }},{{ transaction.0.custom_date_1|nice_date }},"{{ transaction.0.custom_text_1|not_none }}"
 {% endfor %}

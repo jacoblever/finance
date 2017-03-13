@@ -4,120 +4,118 @@ types = (('CurrentAccount', 'Current Account'),
     ('ISA', 'ISA'),
     ('CreditCard', 'Credit Card'),)
 
-class AccountTemplate(models.Model):
-    Name = models.CharField(max_length=140)
-    IsBuiltIn = models.BooleanField(
+
+class BankAccountTemplate(models.Model):
+    name = models.CharField(max_length=140)
+    is_built_in = models.BooleanField(
         default=False,
     )
 
-    DateGetter = models.CharField(max_length=100)
-    DescriptionGetter = models.CharField(max_length=100)
-    AmountGetter = models.CharField(max_length=100)
+    get_date = models.CharField(max_length=100)
+    get_description = models.CharField(max_length=100)
+    get_amount = models.CharField(max_length=100)
 
-    CurrentBalanceGetter = models.CharField(
-        max_length=100,
-        null=True,
-        blank=True,
-    )
-
-    OtherDate1Name = models.CharField(
-        max_length=100,
-        null=True,
-        blank=True,
-    )
-    OtherDate1Getter = models.CharField(
+    get_current_balance = models.CharField(
         max_length=100,
         null=True,
         blank=True,
     )
 
-    OtherString1Name = models.CharField(
+    custom_date_1_name = models.CharField(
         max_length=100,
         null=True,
         blank=True,
     )
-    OtherString1Getter = models.CharField(
+    get_custom_date_1 = models.CharField(
+        max_length=100,
+        null=True,
+        blank=True,
+    )
+
+    custom_text_1_name = models.CharField(
+        max_length=100,
+        null=True,
+        blank=True,
+    )
+    get_custom_text_1 = models.CharField(
         max_length=100,
         null=True,
         blank=True,
     )
 
     def __str__(self):
-        return self.Name
+        return self.name
+
 
 class BankAccount(models.Model):
-    AccountHumanName = models.CharField(max_length=140)
-    AccountType = models.CharField(max_length=140, choices=types)
-    AccountNumber = models.CharField(
-        max_length=8,
+    name = models.CharField(max_length=140)
+    account_type = models.CharField(max_length=140, choices=types)
+    more_details = models.CharField(
+        max_length=100,
         null=True,
         blank=True,
     )
-    SortCode = models.CharField(
-        max_length=8,
-        null=True,
-        blank=True,
-    )
-    IsActive = models.BooleanField(default=True)
-
-    Template = models.ForeignKey(
-        AccountTemplate,
+    is_active = models.BooleanField(default=True)
+    bank_account_template = models.ForeignKey(
+        BankAccountTemplate,
         on_delete=models.PROTECT,
     )
 
     def __str__(self):
-        return self.AccountHumanName
+        return self.name
+
 
 class TransactionLabel(models.Model):
 
-    Name = models.CharField(max_length=255)
+    name = models.CharField(max_length=255)
 
     def __str__(self):
-        return self.Name
+        return self.name
 
     @classmethod
-    def create(cls, name, thisId = None):
+    def create(cls, name, id_ = None):
         label = cls()
-        label.Name = name
-        if thisId is not None:
-            label.id = thisId
+        label.name = name
+        if id_ is not None:
+            label.id = id_
         return label
 
-class BankTransaction(models.Model):
-    Account = models.ForeignKey(
+
+class Transaction(models.Model):
+    bank_account = models.ForeignKey(
         BankAccount,
         on_delete=models.PROTECT,
     )
-    Date = models.DateField()
-    Description  = models.CharField(max_length=255)
-    Amount = models.DecimalField(max_digits=10, decimal_places=2)
-    CurrentBalance = models.DecimalField(
+    date = models.DateField()
+    description  = models.CharField(max_length=255)
+    amount = models.DecimalField(max_digits=10, decimal_places=2)
+    current_balance = models.DecimalField(
         max_digits=10,
         decimal_places=2,
         null=True,
         blank=True,
     )
-    Label = models.ForeignKey(
+    transaction_label = models.ForeignKey(
         TransactionLabel,
         null=True,
         blank=True,
         on_delete=models.PROTECT,
     )
-    DateUploaded = models.DateTimeField()
-    Notes = models.CharField(
+    date_imported = models.DateTimeField()
+    notes = models.CharField(
         max_length=255,
         null=True,
         blank=True,
     )
-    OtherDate1 = models.DateField(
+    custom_date_1 = models.DateField(
         null=True,
         blank=True,
     )
-    OtherString1 = models.CharField(
+    custom_text_1 = models.CharField(
         max_length=255,
         null=True,
         blank=True,
     )
 
     def __str__(self):
-        return self.Description
+        return self.description

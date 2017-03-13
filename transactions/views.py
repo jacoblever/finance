@@ -5,54 +5,56 @@ from django.db.models import Count
 from datetime import datetime
 from django.core.urlresolvers import reverse
 
-from transactions.models import BankTransaction
+from transactions.models import Transaction
 from .forms import UploadForm, TransactionFilterForm, TransactionForm, ManualForm, BankAccountForm, AccountTemplateForm
-from .models import BankAccount, AccountTemplate
-from .src.upload import uploadTransactions
-from .src.filter import applyFilter
-from .src.graph import makeGraph
+from .models import BankAccount, BankAccountTemplate
+from .src.upload import import_transactions
+from .src.filter import apply_filter
+from .src.graph import make_graph
 import uuid
 
 import urllib
 import math
 from datetime import datetime
 
+
 def upload(request):
     if request.method == 'POST':
         form = UploadForm(request.POST, request.FILES)
-        actuallyUpload = request.POST.get('actually-upload') == 'true'
-        if(actuallyUpload):
-            output = uploadTransactions(form, actuallyUpload)
+        actually_upload = request.POST.get('actually-upload') == 'true'
+        if actually_upload:
+            output = import_transactions(form, actually_upload)
             return render(
                 request,
                 'transactions/upload-result.html',
-                {'totalCount': output[0],
-                 'potentialDuplicates': None,
-                 'existingCount': output[2],
+                {'total_count': output[0],
+                 'potential_duplicates': None,
+                 'existing_count': output[2],
                  'problems': []})
         else:
-            output = uploadTransactions(form, actuallyUpload)
+            output = import_transactions(form, actually_upload)
             return render(
                 request,
                 'transactions/upload-result.html',
-                {'totalCount': output[0],
-                 'potentialDuplicates': output[1],
-                 'existingCount': output[2],
+                {'total_count': output[0],
+                 'potential_duplicates': output[1],
+                 'existing_count': output[2],
                  'problems': output[3]})
     else:
         form = UploadForm()
         return render(request, 'transactions/upload.html', {'form': form})
 
-def manual(request, id=None):
-    existing = BankTransaction.objects.get(pk=id) if id != None else None
-    if existing != None and existing.Account.id != -1:
+
+def manual(request, id_=None):
+    existing = Transaction.objects.get(pk=id_) if id_ != None else None
+    if existing != None and existing.bank_account.id != -1:
         raise Exception('You sould not be editing an imported transaction')
     if request.method != 'POST':
         form = ManualForm(instance=existing)
         return render(
             request,
             'transactions/manual.html',
-            {'form': form, 'addingNewTransaction': id is None})
+            {'form': form, 'adding_new_transaction': id_ is None})
     else:
         if request.POST.get('delete') == 'true':
             existing.delete()
@@ -60,55 +62,57 @@ def manual(request, id=None):
             form = ManualForm(request.POST, instance=existing)
             transaction = form.save(commit=False)
             if existing == None:
-                transaction.Account = BankAccount.objects.get(pk=-1)
-                transaction.DateUploaded = datetime.now()
+                transaction.bank_account = BankAccount.objects.get(pk=-1)
+                transaction.date_imported = datetime.now()
             transaction.save()
-        returnUrl = request.POST.get('return-url')
-        return redirect(returnUrl if returnUrl != '' else reverse('home'))
+        return_url = request.POST.get('return-url')
+        return redirect(return_url if return_url != '' else reverse('home'))
 
-def editAccount(request, id=None):
-    bankAccount = BankAccount.objects.get(pk=id) if id != None else None
-    if id != None and bankAccount.id < 0:
+
+def edit_account(request, id_=None):
+    bank_account = BankAccount.objects.get(pk=id_) if id_ != None else None
+    if id_ != None and bank_account.id < 0:
         raise Exception('You should not be editing a built in account')
-    originalHasCustomTemplate = bankAccount is not None and not bankAccount.Template.IsBuiltIn
-    customAccountTemplate = bankAccount.Template if originalHasCustomTemplate else None
+    original_has_custom_template = bank_account is not None and not bank_account.bank_account_template.is_built_in
+    custom_account_template = bank_account.bank_account_template if original_has_custom_template else None
     if request.method != 'POST':
-        templateId = "custom" if originalHasCustomTemplate else\
-            (bankAccount.Template.id if bankAccount is not None else "")
-        accountForm = BankAccountForm(initial={'template': templateId}, instance=bankAccount)
-        templateForm = AccountTemplateForm(instance=customAccountTemplate)
+        template_id = "custom" if original_has_custom_template else\
+            (bank_account.bank_account_template.id if bank_account is not None else "")
+        account_form = BankAccountForm(initial={'template': template_id}, instance=bank_account)
+        template_form = AccountTemplateForm(instance=custom_account_template)
         return render(
             request,
             'transactions/edit_account.html',
             {
-                'accountForm': accountForm,
-                'addingNewAccount': id is None,
-                'templateForm': templateForm
+                'account_form': account_form,
+                'adding_new_account': id_ is None,
+                'template_form': template_form
             })
     else:
         if request.POST.get('delete') == 'true':
-            template = bankAccount.Template
-            bankAccount.delete()
-            if not template.IsBuiltIn:
+            template = bank_account.bank_account_template
+            bank_account.delete()
+            if not template.is_built_in:
                 template.delete()
         else:
-            accountForm = BankAccountForm(request.POST, instance=bankAccount)
-            resultHasCustomTemplate = request.POST.get('template') == 'custom'
-            if resultHasCustomTemplate:
-                templateForm = AccountTemplateForm(request.POST, instance=customAccountTemplate)
-                customAccountTemplate = templateForm.save(commit=False)
-                if customAccountTemplate.Name == '':
-                    customAccountTemplate.Name = uuid.uuid4()
-                customAccountTemplate.save()
+            account_form = BankAccountForm(request.POST, instance=bank_account)
+            result_has_custom_template = request.POST.get('template') == 'custom'
+            if result_has_custom_template:
+                template_form = AccountTemplateForm(request.POST, instance=custom_account_template)
+                custom_account_template = template_form.save(commit=False)
+                if custom_account_template.name == '':
+                    custom_account_template.name = uuid.uuid4()
+                custom_account_template.save()
 
-            bankAccount = accountForm.save(commit=False)
-            bankAccount.Template = customAccountTemplate if resultHasCustomTemplate\
-                else AccountTemplate.objects.get(pk=request.POST.get('template'))
-            bankAccount.save()
+            bank_account = account_form.save(commit=False)
+            bank_account.bank_account_template = custom_account_template if result_has_custom_template\
+                else BankAccountTemplate.objects.get(pk=request.POST.get('template'))
+            bank_account.save()
 
-            if originalHasCustomTemplate and not resultHasCustomTemplate:
-                customAccountTemplate.delete()
+            if original_has_custom_template and not result_has_custom_template:
+                custom_account_template.delete()
         return redirect(reverse('accounts'))
+
 
 class TransactionsView(ListView):
     template_name="transactions/index.html"
@@ -116,14 +120,15 @@ class TransactionsView(ListView):
     def __init__(self):
         self.pageSize = 50
     
-    def getFilterForm(self):
+    def get_filter_form(self):
         return TransactionFilterForm(self.request.GET)
+
     def get_queryset(self):
         form = TransactionFilterForm(self.request.GET)
-        filtered = applyFilter(form)
+        filtered = apply_filter(form)
 
-        if(form.isPaged()):
-            page = form.getPage()
+        if(form.is_paged()):
+            page = form.get_page()
             start = (page-1)*self.pageSize
             end = start + self.pageSize
             filtered = filtered[start:end]
@@ -135,18 +140,18 @@ class TransactionsView(ListView):
     def get_context_data(self, **kwargs):
         context = super(TransactionsView, self).get_context_data(**kwargs)
         form = TransactionFilterForm(self.request.GET)
-        accounts = form.getAccount()
+        accounts = form.get_account()
         if accounts != None and len(accounts) == 1:
-            context['singleAccount'] = BankAccount.objects.get(pk=accounts[0])
+            context['single_account'] = BankAccount.objects.get(pk=accounts[0])
         else:
-            context['singleAccount'] = None
+            context['single_account'] = None
 
-        context['bulkForm'] = TransactionForm()
-        context['totalFound'] = len(applyFilter(form))
-        if form.isPaged():
-            context['page'] = form.getPage()
-            totalPages = math.ceil(context['totalFound']/self.pageSize)
-            context['pages'] = range(1, totalPages + 1)
+        context['bulk_form'] = TransactionForm()
+        context['total_found'] = len(apply_filter(form))
+        if form.is_paged():
+            context['page'] = form.get_page()
+            total_pages = math.ceil(context['total_found']/self.pageSize)
+            context['pages'] = range(1, total_pages + 1)
         return context
 
     
@@ -158,42 +163,47 @@ class TransactionsDownloadView(TransactionsView):
         response['Content-Disposition'] = 'attachment; filename="data.csv"'
         return response
 
-def saveLabels(request):
+
+def save_labels(request):
     if request.method == 'POST':
         ids = request.POST.getlist('id')
         for id in ids:
             form = TransactionForm(
                 request.POST,
                 prefix=id,
-                instance=BankTransaction.objects.get(pk=id))
+                instance=Transaction.objects.get(pk=id))
             form.save();
         return redirect("../")
     else:
         return HttpResponse('Error: This should be a POST request')
 
+
 class PastUploadsView(ListView):
     template_name="transactions/past-uploads.html"
     
-    def getFilterForm(self):
+    def get_filter_form(self):
         return TransactionFilterForm(self.request.GET)
+
     def get_queryset(self):
         return [
             (
-                x['DateUploaded'].strftime('%H:%M:%S - %d %B %Y'),
+                x['date_imported'].strftime('%H:%M:%S - %d %B %Y'),
                 x['count'],
-                x['DateUploaded'].strftime("%Y-%m-%d_%H:%M:%S.%f")
+                x['date_imported'].strftime("%Y-%m-%d_%H:%M:%S.%f")
             )
             for x
-            in BankTransaction.objects.all().values('DateUploaded').annotate(count=Count('id')).order_by('-DateUploaded')
-        ];
+            in Transaction.objects.all().values('date_imported').annotate(count=Count('id')).order_by('-date_imported')
+            ]
 
-def deletePastUploads(request):
+
+def delete_past_uploads(request):
     if request.method == 'POST':
-        toDelete = datetime.strptime(request.POST.get('datetime'), '%Y-%m-%d_%H:%M:%S.%f')
-        BankTransaction.objects.all().filter(DateUploaded=toDelete).delete()
+        to_delete = datetime.strptime(request.POST.get('datetime'), '%Y-%m-%d_%H:%M:%S.%f')
+        Transaction.objects.all().filter(date_imported=to_delete).delete()
         return HttpResponse('Done')
     else:
         return HttpResponse('Error: This should be a POST request')
 
+
 def graph(request):
-    return makeGraph(request)
+    return make_graph(request)

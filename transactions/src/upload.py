@@ -1,134 +1,139 @@
 import csv
 from io import TextIOWrapper
-from transactions.models import BankAccount, BankTransaction, TransactionLabel, AccountTemplate
+from transactions.models import BankAccount, Transaction, TransactionLabel, BankAccountTemplate
 from datetime import datetime
 from decimal import Decimal
 
-def uploadTransactions(form, actuallyUpload):
-    TransactionIdCol = 'TransactionId'
-    AccountIdCol = 'AccountId'
 
-    text = TextIOWrapper(form.getFile().file, encoding='ISO-8859-1')
-    spamreader = csv.DictReader(text)
-    duplicates = BankTransaction.objects.none()
-    duplicatesSoFar = list(BankTransaction.objects.none())
+def import_transactions(form, actually_upload):
+    transaction_id_col = 'TransactionId'
+
+    text = TextIOWrapper(form.get_file().file, encoding='ISO-8859-1')
+    reader = csv.DictReader(text)
+    duplicates = Transaction.objects.none()
+    duplicates_so_far = list(Transaction.objects.none())
     labels = TransactionLabel.objects.all()
-    account = BankAccount.objects.get(pk=form.getAccount()) if form.getAccount() != '' else None
+    account = BankAccount.objects.get(pk=form.get_account()) if form.get_account() != '' else None
     now = datetime.now()
     problems = []
 
-    existingCount = 0
+    existing_count = 0
     count = 0
-    for row in spamreader:
+    for row in reader:
         count += 1
-        transaction = BankTransaction()
-        existingTransaction = False
-        if TransactionIdCol in row and row[TransactionIdCol] != "":
-            id = int(row[TransactionIdCol])
-            transaction = BankTransaction.objects.get(pk=id)
-            newTemp = BankTransaction()
-            populateBankTransactionInfo(newTemp, row, getReimportAccountTemplate())
-            if transaction.Account.id != int(row['AccountId']):
-                problems.append(str(id) + ": Account id changed " + str(transaction.Account.id) + " != " + row['AccountId'])
-            for problem in checkBankTransactionInfoConsistency(transaction, newTemp):
-                problems.append(str(id) + ": " + problem)
-            existingTransaction = True
-            existingCount += 1
+        transaction = Transaction()
+        existing_transaction = False
+        if transaction_id_col in row and row[transaction_id_col] != "":
+            id_ = int(row[transaction_id_col])
+            transaction = Transaction.objects.get(pk=id_)
+            new_temp = Transaction()
+            populate_bank_transaction_info(new_temp, row, get_reimport_account_template())
+            if transaction.bank_account.id != int(row['AccountId']):
+                problems.append(str(id_) + ": Account id changed " + str(transaction.bank_account.id) + " != " + row['AccountId'])
+            for problem in check_bank_transaction_info_consistency(transaction, new_temp):
+                problems.append(str(id_) + ": " + problem)
+            existing_transaction = True
+            existing_count += 1
         else:
-            transaction.Account = account
-            transaction.DateUploaded = now
+            transaction.bank_account = account
+            transaction.date_imported = now
             if account == None:
                 problems.append("Could not parse transaction: Please select an account")
             else:
                 try:
-                    populateBankTransactionInfo(transaction, row, account.Template)
+                    populate_bank_transaction_info(transaction, row, account.bank_account_template)
                 except Exception as e:
                     problems.append("Could not parse transaction: '" + str(e) + "'")
 
-        populateMetaTransactionInfo(transaction, row, labels)
+        populate_meta_transaction_info(transaction, row, labels)
 
-        if actuallyUpload:
+        if actually_upload:
             if len(problems) > 0:
                 raise Exception("Cannot save if there are problems")
             transaction.save()
         else:
-            if not existingTransaction:
-                duplicates = duplicates | BankTransaction.objects.all().filter(
-                    Date = transaction.Date,
-                    Description = transaction.Description,
-                    Amount = transaction.Amount,
-                    CurrentBalance = transaction.CurrentBalance,
-                    OtherDate1 = transaction.OtherDate1,
-                    OtherString1 = transaction.OtherString1,
+            if not existing_transaction:
+                duplicates = duplicates | Transaction.objects.all().filter(
+                    date = transaction.date,
+                    description = transaction.description,
+                    amount = transaction.amount,
+                    current_balance = transaction.current_balance,
+                    custom_date_1 = transaction.custom_date_1,
+                    custom_text_1 = transaction.custom_text_1,
                     )
             if count % 50 == 0:
-                duplicatesSoFar = duplicatesSoFar + list(duplicates)
-                duplicates = BankTransaction.objects.none()
+                duplicates_so_far = duplicates_so_far + list(duplicates)
+                duplicates = Transaction.objects.none()
 
-    duplicatesSoFar = duplicatesSoFar + list(duplicates)
-    return (count, list(duplicatesSoFar), existingCount, problems)
+    duplicates_so_far = duplicates_so_far + list(duplicates)
+    return count, list(duplicates_so_far), existing_count, problems
 
-def checkBankTransactionInfoConsistency(t1, t2):
+
+def check_bank_transaction_info_consistency(t1, t2):
     problems = []
-    test(problems, t1, t2, lambda x: x.Date.strftime('%m/%d/%Y'))
-    test(problems, t1, t2, lambda x: x.Description)
-    test(problems, t1, t2, lambda x: x.Amount)
-    test(problems, t1, t2, lambda x: x.CurrentBalance)
-    test(problems, t1, t2, lambda x: None if x.OtherDate1 == None else x.OtherDate1.strftime('%m/%d/%Y'))
-    test(problems, t1, t2, lambda x: x.OtherString1)
+    test(problems, t1, t2, lambda x: x.date.strftime('%m/%d/%Y'))
+    test(problems, t1, t2, lambda x: x.description)
+    test(problems, t1, t2, lambda x: x.amount)
+    test(problems, t1, t2, lambda x: x.current_balance)
+    test(problems, t1, t2, lambda x: None if x.custom_date_1 == None else x.custom_date_1.strftime('%m/%d/%Y'))
+    test(problems, t1, t2, lambda x: x.custom_text_1)
     return problems
+
 
 def test(problems, t1, t2, lam):
     if lam(t1) != lam(t2):
         problems.append("'" + str(lam(t1))  + "' != '" + str(lam(t2) + "'"))
 
-def getReimportAccountTemplate():
-    template = AccountTemplate()
 
-    template.DateGetter = "datetime.strptime(row['Date'], '%d %b %Y')"
-    template.DescriptionGetter = "row['Description']"
-    template.AmountGetter = "Decimal(row['Amount'])"
-    template.CurrentBalanceGetter = "None if row['CurrentBalance'] == '' else Decimal(row['CurrentBalance'])"
-    template.OtherDate1Getter = "None if row['OtherDate1'] == '' else datetime.strptime(row['OtherDate1'], '%d %b %Y')"
-    template.OtherString1Getter = "row['OtherString1']"
+def get_reimport_account_template():
+    template = BankAccountTemplate()
+
+    template.get_date = "datetime.strptime(row['Date'], '%d %b %Y')"
+    template.get_description = "row['Description']"
+    template.get_amount = "Decimal(row['Amount'])"
+    template.get_current_balance = "None if row['CurrentBalance'] == '' else Decimal(row['CurrentBalance'])"
+    template.get_custom_date_1 = "None if row['CustomDate1'] == '' else datetime.strptime(row['CustomDate1'], '%d %b %Y')"
+    template.get_custom_text_1 = "row['CustomText1']"
 
     return template
+
 
 ############################################################
 # Note: Do not remove the row parameter, it must exist in
 # the scope the getters are run
 ############################################################
-def populateBankTransactionInfo(transaction, row, template):
-    transaction.Date = eval(template.DateGetter)
-    transaction.Description = eval(template.DescriptionGetter)
-    transaction.Amount = eval(template.AmountGetter)
-    transaction.CurrentBalance = eval(template.CurrentBalanceGetter)\
-        if template.CurrentBalanceGetter is not None else None
-    transaction.OtherDate1 = eval(template.OtherDate1Getter)\
-        if template.OtherDate1Getter is not None else None
-    transaction.OtherString1 = eval(template.OtherString1Getter)\
-        if template.OtherString1Getter is not None else None
+def populate_bank_transaction_info(transaction, row, template):
+    transaction.date = eval(template.get_date)
+    transaction.description = eval(template.get_description)
+    transaction.amount = eval(template.get_amount)
+    transaction.current_balance = eval(template.get_current_balance)\
+        if template.get_current_balance is not None else None
+    transaction.custom_date_1 = eval(template.get_custom_date_1)\
+        if template.get_custom_date_1 is not None else None
+    transaction.custom_text_1 = eval(template.get_custom_text_1)\
+        if template.get_custom_text_1 is not None else None
 
-def populateMetaTransactionInfo(transaction, row, labels):
-    LabelCol = 'Label'
-    NotesCol = 'Notes'
 
-    transaction.Notes = ''
+def populate_meta_transaction_info(transaction, row, labels):
+    LABEL_COLUMN = 'Label'
+    NOTES_COLUMN = 'Notes'
 
-    if LabelCol in row:
-        labelText = row[LabelCol]
-        if(labelText != None and labelText != ''):
-            label = next((x for x in labels if x.Name == labelText), None)
+    transaction.notes = ''
+
+    if LABEL_COLUMN in row:
+        label_text = row[LABEL_COLUMN]
+        if(label_text != None and label_text != ''):
+            label = next((x for x in labels if x.name == label_text), None)
             if(label != None):
-                transaction.Label = label
+                transaction.transaction_label = label
             else:
-                transaction.Notes = labelText
+                transaction.notes = label_text
 
-    if NotesCol in row:
-        notes = row[NotesCol]
+    if NOTES_COLUMN in row:
+        notes = row[NOTES_COLUMN]
         if(notes != None and notes != ''):
-            if(transaction.Notes != None and transaction.Notes != ''):
-                transaction.Notes = transaction.Notes + ', ' + notes
+            if(transaction.notes != None and transaction.notes != ''):
+                transaction.notes = transaction.notes + ', ' + notes
             else:
-                transaction.Notes = notes
+                transaction.notes = notes
 

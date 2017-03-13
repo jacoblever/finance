@@ -4,22 +4,20 @@
 	<table class="table">
   		<tr>
 			<th>Account Name</th>
-			<th>Account Type</th>
-			<th>Account Number</th>
+			<th>More Details</th>
 			<th>SortCode</th>
 			<th>Active</th>
 			<th>Template</th>
 		</tr>
 		{% for account in object_list %}
 	  		<tr>
-				<td><a href="./{{ account.id }}/">{{ account.AccountHumanName }}</a></td>
-				<td>{{ account.AccountType }}</td>
-				<td>{{ account.AccountNumber }}</td>
-				<td>{{ account.SortCode }}</td>
-				<td>{{ account.IsActive }}</td>
+				<td><a href="./{{ account.id }}/">{{ account.name }}</a></td>
+				<td>{{ account.account_type }}</td>
+				<td>{{ account.more_details }}</td>
+				<td>{{ account.is_active }}</td>
 				<td>
-					{% if account.Template.IsBuiltIn %}
-						{{ account.Template }}
+					{% if account.bank_account_template.is_built_in %}
+						{{ account.bank_account_template }}
 					{% else %}
 						Custom
 					{% endif %}

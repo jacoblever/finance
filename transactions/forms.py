@@ -1,44 +1,45 @@
 from django import forms
-from transactions.models import BankAccount, BankTransaction, TransactionLabel, AccountTemplate
+from transactions.models import BankAccount, Transaction, TransactionLabel, BankAccountTemplate
 from django.contrib.admin.widgets import AdminDateWidget
 from django.conf import settings
 from django.db.utils import OperationalError
+
 
 class UploadForm(forms.Form):
     account = forms.ModelChoiceField(queryset=BankAccount.objects.all())
     file = forms.FileField()
 
-    def getAccount(self):
+    def get_account(self):
         return self['account'].value()
 
-    def getFile(self):
+    def get_file(self):
         return self['file'].value()
 
-    def actuallyUpload(self):
+    def actually_upload(self):
         return self.request.get('actually-upload') == "true"
 
-class TransactionForm(forms.ModelForm):
 
+class TransactionForm(forms.ModelForm):
     class Meta:
-        model = BankTransaction
-        fields = ('Label','Notes')
+        model = Transaction
+        fields = ('transaction_label','notes')
+
 
 class TransactionFilterForm(forms.Form):
-
     @staticmethod
-    def getLabelOptions():
+    def get_label_options():
         try:
-            return [(x.id,x.Name) for x in ([TransactionLabel.create("(Blank)",0)]+list(TransactionLabel.objects.all()))]
+            return [(x.id, x.name) for x in ([TransactionLabel.create("(Blank)",0)]+list(TransactionLabel.objects.all()))]
         except OperationalError:
             # When running makemigrations for the first time this will raise an OperationalError
             # We should ignore it
             return []
 
     account = forms.ModelMultipleChoiceField(
-        queryset=BankAccount.objects.all().filter(IsActive__exact=True),
+        queryset=BankAccount.objects.all().filter(is_active__exact=True),
         required=False,)
     label = forms.MultipleChoiceField(
-        choices=getLabelOptions.__func__(),
+        choices=get_label_options.__func__(),
         required=False,)
     date_from = forms.DateField(
         widget = AdminDateWidget,
@@ -51,36 +52,43 @@ class TransactionFilterForm(forms.Form):
     text = forms.CharField(
         required=False,)
 
-    def getAccount(self):
+    def get_account(self):
         return self['account'].value()
-    def getLabel(self):
+
+    def get_label(self):
         return self['label'].value()
-    def getDateFrom(self):
+
+    def get_date_from(self):
         return self['date_from'].value()
-    def getDateTo(self):
+
+    def get_date_to(self):
         return self['date_to'].value()
-    def getText(self):
+
+    def get_text(self):
         return self['text'].value()
-    def getPage(self):
+
+    def get_page(self):
         return int(self.data.get('page')) if self.data.get('page') != None else 1
-    def isPaged(self):
+
+    def is_paged(self):
         return self.data.get('page') != "all"
+
 
 class ManualForm(forms.ModelForm):
     class Meta:
-        model = BankTransaction
-        fields = ('Date','Description','Amount','Label','Notes')
+        model = Transaction
+        fields = ('date','description','amount','transaction_label','notes')
         widgets = {
-            'Date': forms.DateInput(attrs={'class':'datepicker'}),
+            'date': forms.DateInput(attrs={'class':'datepicker'}),
         }
 
-class BankAccountForm(forms.ModelForm):
 
+class BankAccountForm(forms.ModelForm):
     @staticmethod
-    def getAccountTemplateOptions():
+    def get_account_template_options():
         try:
             return [('',"---------")]\
-                   +[(x.id,x.Name) for x in AccountTemplate.objects.all().filter(IsBuiltIn__exact=True)] \
+                   +[(x.id, x.name) for x in BankAccountTemplate.objects.all().filter(is_built_in__exact=True)] \
                    +[('custom',"Custom...")]
         except OperationalError:
             # When running makemigrations for the first time this will raise an OperationalError
@@ -88,35 +96,37 @@ class BankAccountForm(forms.ModelForm):
             return []
 
     template = forms.ChoiceField(
-        choices=getAccountTemplateOptions.__func__())
+        choices=get_account_template_options.__func__())
 
     class Meta:
         model = BankAccount
-        fields = ('AccountHumanName', 'AccountType', 'AccountNumber', 'SortCode', 'IsActive', 'template')
+        fields = ('name', 'account_type', 'more_details', 'is_active', 'template')
+
 
 class AccountTemplateForm(forms.ModelForm):
     has_balance = forms.BooleanField(required=False)
-    has_other_date_1 = forms.BooleanField(required=False)
-    has_other_string_1 = forms.BooleanField(required=False)
+    has_custom_date_1 = forms.BooleanField(required=False)
+    has_custom_text_1 = forms.BooleanField(required=False)
+
     class Meta:
-        model = AccountTemplate
+        model = BankAccountTemplate
         fields = (
-            'DateGetter',
-            'DescriptionGetter',
-            'AmountGetter',
+            'get_date',
+            'get_description',
+            'get_amount',
             'has_balance',
-            'CurrentBalanceGetter',
-            'has_other_date_1',
-            'OtherDate1Name',
-            'OtherDate1Getter',
-            'has_other_string_1',
-            'OtherString1Name',
-            'OtherString1Getter',
+            'get_current_balance',
+            'has_custom_date_1',
+            'custom_date_1_name',
+            'get_custom_date_1',
+            'has_custom_text_1',
+            'custom_text_1_name',
+            'get_custom_text_1',
         )
         widgets = {
-            'CurrentBalanceGetter': forms.TextInput(attrs={'required': ''}),
-            'OtherDate1Name': forms.TextInput(attrs={'required': ''}),
-            'OtherDate1Getter': forms.TextInput(attrs={'required': ''}),
-            'OtherString1Name': forms.TextInput(attrs={'required': ''}),
-            'OtherString1Getter': forms.TextInput(attrs={'required': ''}),
+            'get_current_balance': forms.TextInput(attrs={'required': ''}),
+            'custom_date_1_name': forms.TextInput(attrs={'required': ''}),
+            'get_custom_date_1': forms.TextInput(attrs={'required': ''}),
+            'custom_text_1_name': forms.TextInput(attrs={'required': ''}),
+            'get_custom_text_1': forms.TextInput(attrs={'required': ''}),
         }

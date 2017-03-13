@@ -1,40 +1,45 @@
-from transactions.models import BankAccount, BankTransaction, TransactionLabel
+from transactions.models import BankAccount, Transaction, TransactionLabel
 from transactions.forms import TransactionFilterForm
 from datetime import datetime
 
-def mathes(transactions, propFunc, formValue):
-    if formValue == None or (formValue != None and len(formValue) == 0):
+
+def matches(transactions, prop_func, form_value):
+    if form_value == None or (form_value != None and len(form_value) == 0):
         return transactions
     else:
         # 0 means None (blank)
-        return [x for x in transactions if (propFunc(x) in [(int(x) if x != "0" else None) for x in formValue])]
+        return [x for x in transactions if (prop_func(x) in [(int(x) if x != "0" else None) for x in form_value])]
 
-def mathesDate(transactions, condition, formValue):
-    if formValue != None and formValue != '':
-        parsedDate = datetime.strptime(formValue, '%Y-%m-%d').date()
-        return [x for x in transactions if condition(x, parsedDate)]
+
+def matches_date(transactions, condition, form_value):
+    if form_value != None and form_value != '':
+        parsed_date = datetime.strptime(form_value, '%Y-%m-%d').date()
+        return [x for x in transactions if condition(x, parsed_date)]
     else:
         return transactions
 
-def transactionMathesText(transaction, text):
-    notes = transaction.Notes
+
+def transaction_matches_text(transaction, text):
+    notes = transaction.notes
     if notes == None:
         notes = ''
-    return (text.lower() in transaction.Description.lower()
+    return (text.lower() in transaction.description.lower()
             or text.lower() in notes.lower())
 
-def mathesText(transactions, text):
+
+def matches_text(transactions, text):
     if text != None and text != '':
-        return [x for x in transactions if transactionMathesText(x, text)]
+        return [x for x in transactions if transaction_matches_text(x, text)]
     else:
         return transactions
 
-def applyFilter(form):
-    transactions = BankTransaction.objects.all()
-    transactions = mathes(transactions, lambda x: x.Label_id, form.getLabel())
-    transactions = mathes(transactions, lambda x: x.Account_id, form.getAccount())
-    transactions = mathesDate(transactions, lambda x, date: x.Date >= date, form.getDateFrom())
-    transactions = mathesDate(transactions, lambda x, date: x.Date <= date, form.getDateTo())
-    transactions = mathesText(transactions, form.getText())
-    sortedTransactions = sorted(transactions, key=lambda x: x.Date)
-    return sortedTransactions
+
+def apply_filter(form):
+    transactions = Transaction.objects.all()
+    transactions = matches(transactions, lambda x: x.transaction_label_id, form.get_label())
+    transactions = matches(transactions, lambda x: x.bank_account_id, form.get_account())
+    transactions = matches_date(transactions, lambda x, date: x.date >= date, form.get_date_from())
+    transactions = matches_date(transactions, lambda x, date: x.date <= date, form.get_date_to())
+    transactions = matches_text(transactions, form.get_text())
+    sorted_transactions = sorted(transactions, key=lambda x: x.date)
+    return sorted_transactions

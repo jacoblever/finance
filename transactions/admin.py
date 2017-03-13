@@ -1,8 +1,8 @@
 from django.contrib import admin
 
-from transactions.models import BankAccount, BankTransaction, TransactionLabel, AccountTemplate
+from transactions.models import BankAccount, Transaction, TransactionLabel, BankAccountTemplate
 
 admin.site.register(BankAccount)
-admin.site.register(BankTransaction)
+admin.site.register(Transaction)
 admin.site.register(TransactionLabel)
-admin.site.register(AccountTemplate)
+admin.site.register(BankAccountTemplate)

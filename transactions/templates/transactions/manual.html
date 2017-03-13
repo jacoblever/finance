@@ -2,7 +2,7 @@
 
 {% block content %}
 	<h1>
-		{% if addingNewTransaction %}
+		{% if adding_new_transaction %}
 			Add Manual Transaction
 		{% else %}
 			Edit Manual Transaction
@@ -14,11 +14,11 @@
 		</table>
 		<input type="hidden" name="return-url" value="{{ request.META.HTTP_REFERER }}">
 		<button type="submit">Save</button>
-		{% if addingNewTransaction == False %}
+		{% if adding_new_transaction == False %}
 			<button name="delete" value="true" type="submit">Delete</button>
 		{% endif %}
 	</form>
 	<script>
-		rome(document.getElementById('id_Date'),{inputFormat: "YYYY-MM-DD"});
+		rome(document.getElementById('id_date'),{inputFormat: "YYYY-MM-DD"});
 	</script>
 {% endblock %}

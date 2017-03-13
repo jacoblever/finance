@@ -9,18 +9,18 @@
 		{% endfor %}
 	</ul>
 {% endif %}
-{% if potentialDuplicates == None %}
+{% if potential_duplicates == None %}
 	<h2>
-		{{ totalCount|subtract:existingCount }} new transactions uploaded. {{ existingCount }} updated - <a href="../">Back</a>
+		{{ total_count|subtract:existing_count }} new transactions uploaded. {{ existing_count }} updated - <a href="../">Back</a>
 	</h2>
-{% elif potentialDuplicates|length == 0 %}
+{% elif potential_duplicates|length == 0 %}
 	<h2>
-		{{ totalCount }} transactions found. {{ existingCount }} of which are updates. No potential duplicates.
+		{{ total_count }} transactions found. {{ existing_count }} of which are updates. No potential duplicates.
 	</h2>
 	<input type="hidden" name="actually-upload" value="true" />
 {% else %}
 	<h2>
-		{{ totalCount }} transactions found. The following {{ potentialDuplicates|length }} transactions already exist in the database and appear to be the same as transactions you are trying to upload (although they may be for a different account).
+		{{ total_count }} transactions found. The following {{ potential_duplicates|length }} transactions already exist in the database and appear to be the same as transactions you are trying to upload (although they may be for a different account).
 	</h2>
 	<table class="table">
 		<tr>
@@ -31,16 +31,16 @@
 			<th>Label</th>
 			<th>Notes</th>
 		</tr>
-		{% for transaction in potentialDuplicates %}
+		{% for transaction in potential_duplicates %}
 	  		<tr duplicate-transaction>
-				<td>{{ transaction.Account }}</td>
-				<td>{{ transaction.Date|nice_date }}</td>
-				<td>{{ transaction.Description }}</td>
-				<td>{{ transaction.Amount }}</td>
-				<td>{{ transaction.Label }}</td>
-				<td>{{ transaction.Notes }}</td>
+				<td>{{ transaction.bank_account }}</td>
+				<td>{{ transaction.date|nice_date }}</td>
+				<td>{{ transaction.description }}</td>
+				<td>{{ transaction.amount }}</td>
+				<td>{{ transaction.transaction_label }}</td>
+				<td>{{ transaction.notes }}</td>
 			</tr>
 		{% endfor %}
-	<table>
+	</table>
 	<input type="checkbox" name="actually-upload" value="true" id="actually-upload" /><label for="actually-upload">Upload anyway</label>
 {% endif %}

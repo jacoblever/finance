@@ -3,7 +3,7 @@
 
 {% block content %}
 	<h1>
-		{% if addingNewAccount %}
+		{% if adding_new_account %}
 			Add Account
 		{% else %}
 			Edit Account
@@ -12,14 +12,14 @@
 	<form method="POST">{% csrf_token %}
 		<table class="table">
 			<tbody>
-				{{ accountForm.as_table }}
+				{{ account_form.as_table }}
 			</tbody>
 			<tbody custom-template-table>
-				{{ templateForm.as_table }}
+				{{ template_form.as_table }}
 			</tbody>
 		</table>
 		<button type="submit">Save</button>
-		{% if addingNewAccount == False %}
+		{% if adding_new_account == False %}
 			<button name="delete" value="true" type="submit">Delete</button>
 		{% endif %}
 	</form>

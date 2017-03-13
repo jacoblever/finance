@@ -5,7 +5,7 @@
 {% block content %}
 	<form filter-form method="GET">
 		<ul class="filter-ul">
-			{{ view.getFilterForm.as_ul }}
+			{{ view.get_filter_form.as_ul }}
 			{% if page == None %}
 				<input type="hidden" name="page" value="all">
 			{% endif %}
@@ -19,7 +19,7 @@
 	</form>
 	<ul class="filter-ul" bulk-form>
 		<li>Bulk Edit (this will change all the items below)</li>
-		{{ bulkForm.as_ul }}
+		{{ bulk_form.as_ul }}
 		<li><button reset-button>Reset</button></li>
 	</ul>
 	<form method="POST" action="./save-labels/" transactions-form>{% csrf_token %}
@@ -27,7 +27,7 @@
 			<button type="submit">Save</button>
 
 			<div style="float: right">
-				{{ totalFound }} transactions -
+				{{ total_found }} transactions -
 				{% if page == None %}
 					Showing all items - <a href="javascript:gotoPage(1);">Use pageination</a>
 				{% else %}
@@ -57,12 +57,12 @@
 	  		<tr>
 				<th>Account</th>
 				<th>Date</th>
-				{% if singleAccount != None %}
-					{% if singleAccount.OtherDate1Name != None %}
-						<th>{{ singleAccount.OtherDate1Name }}</th>
+				{% if single_account != None %}
+					{% if single_account.custom_date_1_name != None %}
+						<th>{{ single_account.custom_date_1_name }}</th>
 					{% endif %}
-					{% if singleAccount.OtherString1Name != None %}
-						<th>{{ singleAccount.OtherString1Name }}</th>
+					{% if single_account.custom_text_1_name != None %}
+						<th>{{ single_account.custom_text_1_name }}</th>
 					{% endif %}
 				{% endif %}
 				<th>Description</th>
@@ -78,29 +78,29 @@
 							type="hidden"
 							name="id"
 							value="{{ transaction.0.id }}" />
-						{{ transaction.0.Account }}
+						{{ transaction.0.bank_account }}
 					</td>
-					<td>{{ transaction.0.Date|nice_date }}</td>
-					{% if singleAccount != None %}
-						{% if singleAccount.OtherDate1Name != None %}
-							<td>{{ transaction.0.OtherDate1|nice_date }}</td>
+					<td>{{ transaction.0.date|nice_date }}</td>
+					{% if single_account != None %}
+						{% if single_account.custom_date_1_name != None %}
+							<td>{{ transaction.0.custom_date_1|nice_date }}</td>
 						{% endif %}
-						{% if singleAccount.OtherString1Name != None %}
-							<td>{{ transaction.0.OtherString1 }}</td>
+						{% if single_account.custom_text_1_name != None %}
+							<td>{{ transaction.0.custom_text_1 }}</td>
 						{% endif %}
 					{% endif %}
-					<td>{{ transaction.0.Description }}</td>
-					<td>{{ transaction.0.Amount }}</td>
+					<td>{{ transaction.0.description }}</td>
+					<td>{{ transaction.0.amount }}</td>
 					<td>
-						{% if transaction.0.Account.id == -1 %}
+						{% if transaction.0.bank_account.id == -1 %}
 							<a href="./manual/{{ transaction.0.id }}">Edit</a>
 						{% endif %}
 					</td>
 					<td>
-						{{ transaction.1.Label }}
+						{{ transaction.1.transaction_label }}
 					</td>
 					<td>
-						{{ transaction.1.Notes }}
+						{{ transaction.1.notes }}
 					</td>
 				</tr>
 			{% endfor %}
