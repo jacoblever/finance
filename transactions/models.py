@@ -118,4 +118,4 @@ class Transaction(models.Model):
     )
 
     def __str__(self):
-        return self.description
+        return "{0}: {1} - {2}".format(self.bank_account, self.description, self.amount)
