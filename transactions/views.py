@@ -6,9 +6,9 @@ from datetime import datetime
 from django.core.urlresolvers import reverse
 
 from transactions.models import Transaction
-from .forms import UploadForm, TransactionFilterForm, TransactionForm, ManualForm, BankAccountForm, AccountTemplateForm
+from .forms import ImportForm, TransactionFilterForm, TransactionForm, ManualForm, BankAccountForm, AccountTemplateForm
 from .models import BankAccount, BankAccountTemplate
-from .src.upload import import_transactions
+from .src.import_transactions import import_transactions
 from .src.filter import apply_filter
 from .src.graph import make_graph
 import uuid
@@ -18,31 +18,31 @@ import math
 from datetime import datetime
 
 
-def upload(request):
+def import_transactions(request):
     if request.method == 'POST':
-        form = UploadForm(request.POST, request.FILES)
-        actually_upload = request.POST.get('actually-upload') == 'true'
-        if actually_upload:
-            output = import_transactions(form, actually_upload)
+        form = ImportForm(request.POST, request.FILES)
+        actually_import = request.POST.get('actually-import') == 'true'
+        if actually_import:
+            output = import_transactions(form, actually_import)
             return render(
                 request,
-                'transactions/upload-result.html',
+                'transactions/import-result.html',
                 {'total_count': output[0],
                  'potential_duplicates': None,
                  'existing_count': output[2],
                  'problems': []})
         else:
-            output = import_transactions(form, actually_upload)
+            output = import_transactions(form, actually_import)
             return render(
                 request,
-                'transactions/upload-result.html',
+                'transactions/import-result.html',
                 {'total_count': output[0],
                  'potential_duplicates': output[1],
                  'existing_count': output[2],
                  'problems': output[3]})
     else:
-        form = UploadForm()
-        return render(request, 'transactions/upload.html', {'form': form})
+        form = ImportForm()
+        return render(request, 'transactions/import.html', {'form': form})
 
 
 def manual(request, id_=None):
@@ -178,8 +178,8 @@ def save_labels(request):
         return HttpResponse('Error: This should be a POST request')
 
 
-class PastUploadsView(ListView):
-    template_name="transactions/past-uploads.html"
+class PastImportsView(ListView):
+    template_name="transactions/past-imports.html"
     
     def get_filter_form(self):
         return TransactionFilterForm(self.request.GET)
@@ -196,7 +196,7 @@ class PastUploadsView(ListView):
             ]
 
 
-def delete_past_uploads(request):
+def delete_past_import(request):
     if request.method == 'POST':
         to_delete = datetime.strptime(request.POST.get('datetime'), '%Y-%m-%d_%H:%M:%S.%f')
         Transaction.objects.all().filter(date_imported=to_delete).delete()

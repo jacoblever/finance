@@ -5,7 +5,7 @@ from datetime import datetime
 from decimal import Decimal
 
 
-def import_transactions(form, actually_upload):
+def import_transactions(form, actually_import):
     transaction_id_col = 'TransactionId'
 
     text = TextIOWrapper(form.get_file().file, encoding='ISO-8859-1')
@@ -47,7 +47,7 @@ def import_transactions(form, actually_upload):
 
         populate_meta_transaction_info(transaction, row, labels)
 
-        if actually_upload:
+        if actually_import:
             if len(problems) > 0:
                 raise Exception("Cannot save if there are problems")
             transaction.save()

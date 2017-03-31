@@ -19,7 +19,7 @@
 	<script>
 		$("button").click(function(e){
 			var textDate = $(this).attr("text-date");
-			if(confirm("Do you really want to delete the items uploaded on " + textDate + "?")) {
+			if(confirm("Do you really want to delete the items imported on " + textDate + "?")) {
 				$.ajax({
 					type: "POST",
 				 	url:  './delete/',

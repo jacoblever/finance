@@ -5,7 +5,7 @@ from django.conf import settings
 from django.db.utils import OperationalError
 
 
-class UploadForm(forms.Form):
+class ImportForm(forms.Form):
     account = forms.ModelChoiceField(queryset=BankAccount.objects.all())
     file = forms.FileField()
 
@@ -15,8 +15,8 @@ class UploadForm(forms.Form):
     def get_file(self):
         return self['file'].value()
 
-    def actually_upload(self):
-        return self.request.get('actually-upload') == "true"
+    def actually_import(self):
+        return self.request.get('actually-import') == "true"
 
 
 class TransactionForm(forms.ModelForm):

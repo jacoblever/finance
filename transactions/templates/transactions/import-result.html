@@ -1,7 +1,7 @@
 {% load useful_tags %}
 {% if problems|length > 0 %}
 	<h2>
-		There were {{ problems|length }} problem(s) with the upload. <a href="../">Back</a>
+		There were {{ problems|length }} problem(s) with the import. <a href="../">Back</a>
 	</h2>
 	<ul>
 		{% for problem in problems %}
@@ -11,16 +11,16 @@
 {% endif %}
 {% if potential_duplicates == None %}
 	<h2>
-		{{ total_count|subtract:existing_count }} new transactions uploaded. {{ existing_count }} updated - <a href="../">Back</a>
+		{{ total_count|subtract:existing_count }} new transactions imported. {{ existing_count }} updated - <a href="../">Back</a>
 	</h2>
 {% elif potential_duplicates|length == 0 %}
 	<h2>
 		{{ total_count }} transactions found. {{ existing_count }} of which are updates. No potential duplicates.
 	</h2>
-	<input type="hidden" name="actually-upload" value="true" />
+	<input type="hidden" name="actually-import" value="true" />
 {% else %}
 	<h2>
-		{{ total_count }} transactions found. The following {{ potential_duplicates|length }} transactions already exist in the database and appear to be the same as transactions you are trying to upload (although they may be for a different account).
+		{{ total_count }} transactions found. The following {{ potential_duplicates|length }} transactions already exist in the database and appear to be the same as transactions you are trying to import (although they may be for a different account).
 	</h2>
 	<table class="table">
 		<tr>
@@ -42,5 +42,5 @@
 			</tr>
 		{% endfor %}
 	</table>
-	<input type="checkbox" name="actually-upload" value="true" id="actually-upload" /><label for="actually-upload">Upload anyway</label>
+	<input type="checkbox" name="actually-import" value="true" id="actually-import" /><label for="actually-import">Import anyway</label>
 {% endif %}
