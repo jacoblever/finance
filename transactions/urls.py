@@ -15,7 +15,7 @@ urlpatterns = [
                                 template_name="transactions/accounts.html"), name='accounts'),
     url(r'^accounts/new/$', views.edit_account),
     url(r'^accounts/(?P<id_>\w+)/$', views.edit_account),
-    url(r'^import/$', views.import_transactions),
+    url(r'^import/$', views.import_),
     url(r'^manual/$', views.manual),
     url(r'^manual/(?P<id_>\w+)/$', views.manual),
     url(r'^graph-week-data/$', views.graph),

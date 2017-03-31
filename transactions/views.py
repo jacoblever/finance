@@ -18,7 +18,7 @@ import math
 from datetime import datetime
 
 
-def import_transactions(request):
+def import_(request):
     if request.method == 'POST':
         form = ImportForm(request.POST, request.FILES)
         actually_import = request.POST.get('actually-import') == 'true'
