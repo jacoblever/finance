@@ -14,7 +14,7 @@ def make_graph(request):
         day = int(day_string)
     
     transactions = Transaction.objects.all()
-    labels = list(TransactionLabel.objects.all())
+    labels = list([x for x in TransactionLabel.objects.all() if not x.is_built_in()])
 
     dates = [(x, (x.date - timedelta(days=x.date.weekday()-day))) for x in transactions]
     
