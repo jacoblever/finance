@@ -6,14 +6,20 @@ from decimal import Decimal
 
 
 def import_transactions(form, actually_import):
+    file = TextIOWrapper(form.get_file().file, encoding='ISO-8859-1')
+    import_transactions_core(file, form.get_account(), actually_import)
+
+
+def import_transactions_core(file, account, actually_import):
     transaction_id_col = 'TransactionId'
 
-    text = TextIOWrapper(form.get_file().file, encoding='ISO-8859-1')
-    reader = csv.DictReader(text)
+    reader = csv.DictReader(file)
+    #for row in reader:
+    #    print("row: " + row)
     duplicates = Transaction.objects.none()
     duplicates_so_far = list(Transaction.objects.none())
     labels = TransactionLabel.objects.all()
-    account = BankAccount.objects.get(pk=form.get_account()) if form.get_account() != '' else None
+    account = BankAccount.objects.get(pk=account) if account != '' else None
     now = datetime.now()
     problems = []
 
@@ -49,7 +55,8 @@ def import_transactions(form, actually_import):
 
         if actually_import:
             if len(problems) > 0:
-                raise Exception("Cannot save if there are problems")
+                file = "\n".join(["- " + x for x in problems])
+                raise Exception("Cannot save if there are problems:\n" + file)
             transaction.save()
         else:
             if not existing_transaction:

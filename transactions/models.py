@@ -69,6 +69,9 @@ class TransactionLabel(models.Model):
 
     name = models.CharField(max_length=255)
 
+    def is_built_in(self):
+        return self.id < 0
+
     def __str__(self):
         return self.name
 
@@ -79,6 +82,20 @@ class TransactionLabel(models.Model):
         if id_ is not None:
             label.id = id_
         return label
+
+
+# class Correction(models.Model):
+#     from_transaction = models.ForeignKey(
+#         Transaction,
+#         on_delete=models.PROTECT,
+#     )
+#     to_transaction = models.ForeignKey(
+#         Transaction,
+#         on_delete=models.PROTECT,
+#     )
+#
+#     def amount(self):
+#         self.to_transaction.amount
 
 
 class Transaction(models.Model):
