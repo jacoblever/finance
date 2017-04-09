@@ -24,25 +24,29 @@ from transactions.models import BankAccount, Transaction, TransactionLabel, Bank
 
 
 os.environ.setdefault("DJANGO_SETTINGS_MODULE", "finance.settings")
+
+
 class TestHelper:
-    def setUp(self):
+    def __init__(self):
         self.verbosity = 1
-        self.old_database_name = settings.DATABASE_NAME
+
+    def set_up(self):
+        # settings.DEBUG = False
         setup_test_environment()
-        connection.creation.create_test_db(0)
+        connection.creation.create_test_db(self.verbosity)
         # todo the import here actually runs the ensureSetup script!
         from transactions.src import ensureSetup
 
+    def tear_down(self):
+        connection.creation.destroy_test_db('', self.verbosity)
+        teardown_test_environment()
+
 
 class TestImports(unittest.TestCase):
+
     def setUp(self):
-        # setup_test_environment()
-        # settings.DEBUG = False
-        self.verbosity = 1
-        self.old_database_name = settings.DATABASE_NAME
-        setup_test_environment()
-        connection.creation.create_test_db(0)
-        from transactions.src import ensureSetup
+        self.helper = TestHelper()
+        self.helper.set_up()
 
         halifax_credit = BankAccount()
         halifax_credit.name = 'Halifax Credit'
@@ -61,15 +65,15 @@ class TestImports(unittest.TestCase):
     def tearDown(self):
         os.remove(self.file_name)
 
-        connection.creation.destroy_test_db(self.old_database_name, self.verbosity)
-        teardown_test_environment()
+        self.helper.tear_down()
 
     def test_import(self):
         file = open(self.file_name, "r")
         import_transactions.import_transactions_core(file, 1, True)
 
         # self.assertEqual(file.read(), 'hello')
-        self.assertEqual('hello', 'hello')
+        Transaction.objects.all()
+        self.assertEqual(len(Transaction.objects.all()), 1)
 
     # def test_isupper(self):
     #     self.assertTrue('FOO'.isupper())
