@@ -1,39 +1,31 @@
-import uuid
-import os
 from tests.test_framework import FinanceTestCase
+from tests.builders.BankAccountBuilder import *
+from tests.builders.ImportFileBuilder import *
 from transactions.src import import_transactions
-from transactions.models import BankAccount, Transaction, BankAccountTemplate
+from transactions.models import Transaction
 
 class TestImport(FinanceTestCase):
 
     def setUp(self):
         super().setUp()
-
-        halifax_credit = BankAccount()
-        halifax_credit.name = 'Halifax Credit'
-        halifax_credit.account_type = 'CreditCard'
-        halifax_credit.more_details = ''
-        halifax_credit.is_active = True
-        halifax_credit.bank_account_template = BankAccountTemplate.objects.get(pk=-2)
-        halifax_credit.save()
-
-        self.file_name = "tests/files/" + str(uuid.uuid4()) + ".txt"
-        file_ = open(self.file_name, "w")
-        file_.write('"Date","Date entered","Reference","Description","Amount","Label","Notes"')
-        file_.write('\n24/01/16,24/01/16,99423920,"INTEREST ",0.15,"Loan Interest",')
-        file_.close()
+        self.account_id = BankAccountBuilder().with_test_bank_account_template().build().id
+        self.import_file = ImportFileBuilder().build()
 
     def tearDown(self):
-        os.remove(self.file_name)
+        self.import_file.delete_file()
         super().tearDown()
 
     def test_import(self):
-        file = open(self.file_name, "r")
-        import_transactions.import_transactions_core(file, 1, True)
+        import_transactions.import_transactions_core(
+            self.import_file.open(),
+            self.account_id,
+            actually_import=True)
 
-        # self.assertEqual(file.read(), 'hello')
-        Transaction.objects.all()
-        self.assertEqual(len(Transaction.objects.all()), 1)
+        transactions = Transaction.objects.all()
+        self.assertEqual(len(transactions), 1)
+        self.assertEqual(
+            transactions[0].current_balance,
+            self.import_file.transactions[0].current_balance)
 
     # def test_isupper(self):
     #     self.assertTrue('FOO'.isupper())
