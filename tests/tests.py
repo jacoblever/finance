@@ -1,10 +1,10 @@
 from test_framework import *
 setup_environment()
 
-from tests.test_cases.TestImport import TestImport
+from tests.test_cases.WhenImportingTransactions import WhenImportingTransactions
 
 test_cases = [
-    TestImport,
+    WhenImportingTransactions,
 ]
 
 suite = unittest.TestSuite()

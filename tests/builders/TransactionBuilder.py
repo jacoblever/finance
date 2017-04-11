@@ -31,7 +31,7 @@ class TransactionBuilder:
     def __random_date__(self):
         start = datetime.strptime("01/01/01", '%d/%m/%y')
         end = datetime.strptime("01/01/16", '%d/%m/%y')
-        return start + (end - start) * random.random()
+        return (start + (end - start) * random.random()).date()
 
     def __random_decimal__(self):
         value = random.randrange(10000) / 100

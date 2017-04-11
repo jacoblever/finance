@@ -9,7 +9,7 @@ class BankAccountTemplateBuilder:
         self.template.is_built_in = False
         self.template.get_date = "datetime.strptime(row['Date'], '%d/%m/%y')"
         self.template.get_description = "row['Description']"
-        self.template.get_amount = "-float(row['Amount'])"
+        self.template.get_amount = "float(row['Amount'])"
         self.template.get_current_balance = "float(row['CurrentBalance'])"
         self.template.custom_date_1_name = "Custom Date 1"
         self.template.get_custom_date_1 = "datetime.strptime(row['CustomDate1'], '%d/%m/%y')"
