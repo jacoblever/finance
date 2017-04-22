@@ -26,7 +26,7 @@ class WhenImportingTransactions(FinanceTestCase):
     def test_that_zero_duplicates_are_found(self):
         self.assertEqual(0, len(self.import_result[1]))
 
-    def test_that_zero_existing_transactions_are_edited(self):
+    def test_that_zero_existing_transactions_are_found(self):
         self.assertEqual(0, self.import_result[2])
 
     def test_that_zero_problems_are_found(self):

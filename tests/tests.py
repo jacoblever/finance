@@ -1,10 +1,13 @@
 from test_framework import *
+
 setup_environment()
 
 from tests.test_cases.WhenImportingTransactions import WhenImportingTransactions
+from tests.test_cases.WhenImportingTheSameTransactionTwice import WhenImportingTheSameTransactionTwice
 
 test_cases = [
     WhenImportingTransactions,
+    WhenImportingTheSameTransactionTwice,
 ]
 
 suite = unittest.TestSuite()
