@@ -2,3 +2,4 @@
 db.sqlite3
 transactions/migrations/0001_initial.py
 .idea/*
+**/*.pyc
