@@ -1,7 +1,7 @@
 from django.conf.urls import url
 from django.views.generic import ListView
 
-from transactions.models import BankAccount, Transaction
+from transactions.models import BankAccount, TransactionLabel
 from transactions.forms import TransactionForm
 from transactions.views import TransactionsView, TransactionsDownloadView, PastImportsView
 
@@ -19,7 +19,7 @@ urlpatterns = [
     url(r'^manual/$', views.manual),
     url(r'^manual/(?P<id_>\w+)/$', views.manual),
     url(r'^graph-week-data/$', views.graph),
-    url(r'^graph/$', ListView.as_view(queryset=BankAccount.objects.all(),
+    url(r'^graph/$', ListView.as_view(queryset=TransactionLabel.objects.all(),
                                 template_name="transactions/graph2.html")),
     url(r'^past-imports/$', PastImportsView.as_view()),
     url(r'^past-imports/delete/$', views.delete_past_import)

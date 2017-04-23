@@ -7,7 +7,7 @@ from decimal import Decimal
 
 def import_transactions(form, actually_import):
     file = TextIOWrapper(form.get_file().file, encoding='ISO-8859-1')
-    import_transactions_core(file, form.get_account(), actually_import)
+    return import_transactions_core(file, form.get_account(), actually_import)
 
 
 def import_transactions_core(file, account, actually_import):

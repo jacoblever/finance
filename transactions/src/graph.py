@@ -12,9 +12,14 @@ def make_graph(request):
     day = 0
     if(day_string != None and day_string != ''):
         day = int(day_string)
-    
+
+    label_ids_to_display = [int(x) for x in request.GET.getlist('transaction-label')]
+
     transactions = Transaction.objects.all()
     labels = list([x for x in TransactionLabel.objects.all() if not x.is_built_in()])
+
+    if len(label_ids_to_display) > 0:
+        labels = [x for x in labels if x.id in label_ids_to_display]
 
     dates = [(x, (x.date - timedelta(days=x.date.weekday()-day))) for x in transactions]
     
