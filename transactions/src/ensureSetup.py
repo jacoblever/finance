@@ -48,6 +48,20 @@ natwest.custom_text_1_name = "Type"
 natwest.get_custom_text_1 = "row['Type']"
 natwest.save()
 
+nationwide = get_built_in_item(BankAccountTemplate, -4)
+nationwide.name = "Nationwide"
+nationwide.is_built_in = True
+nationwide.get_date = "datetime.strptime(row['Date'], '%d %b %Y')"
+nationwide.get_description = "row['Description']"
+nationwide.get_amount = "(float(row['Paid in'].replace('£','')) if row['Paid in']!='' else 0) - (float(row['Paid out'].replace('£','')) if row['Paid out']!='' else 0)"
+nationwide.get_current_balance = "float(row['Balance'].replace('£',''))"
+nationwide.custom_date_1_name = None
+nationwide.get_custom_date_1 = "None"
+nationwide.custom_text_1_name = "Transaction type"
+nationwide.get_custom_text_1 = "row['Transaction type']"
+nationwide.save()
+
+
 manual = get_built_in_item(BankAccount, -1)
 manual.name = 'Manual'
 manual.account_type = 'CurrentAccount'
@@ -58,6 +72,6 @@ manual.save()
 
 
 transfer = get_built_in_item(TransactionLabel, -1)
-transfer.name = 'Transfer'
+transfer.name = 'Internal Transfer'
 transfer.save()
 
