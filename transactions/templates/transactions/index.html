@@ -67,7 +67,6 @@
 				{% endif %}
 				<th>Description</th>
 				<th>Amount</th>
-				<th></th>
 				<th>Label</th>
 				<th>Notes</th>
 			</tr>
@@ -89,13 +88,16 @@
 							<td>{{ transaction.0.custom_text_1 }}</td>
 						{% endif %}
 					{% endif %}
-					<td>{{ transaction.0.description }}</td>
-					<td>{{ transaction.0.amount }}</td>
 					<td>
 						{% if transaction.0.bank_account.id == -1 %}
-							<a href="./manual/{{ transaction.0.id }}">Edit</a>
+							<a href="./manual/{{ transaction.0.id }}">
+								{{ transaction.0.description }}
+							</a>
+						{% else %}
+							{{ transaction.0.description }}
 						{% endif %}
 					</td>
+					<td>{{ transaction.0.amount }}</td>
 					<td>
 						{{ transaction.1.transaction_label }}
 					</td>
