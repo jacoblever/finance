@@ -6,7 +6,9 @@ python3 manage.py migrate
 python3 manage.py shell < transactions/src/ensureSetup.py
 python3 manage.py shell < install.py
 
-python3 manage.py createsuperuser --username admin --email jacobianism@gmail.com
+if  [[ $1 != "-q" ]]; then
+    python3 manage.py createsuperuser --username admin --email jacobianism@gmail.com
+fi
 
 python3 manage.py runserver
 

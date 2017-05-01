@@ -1,0 +1,11 @@
+{% extends "transactions/template.html" %}
+{% load static %}
+{% load useful_tags %}
+
+{% block content %}
+    {# todo format this and allow editing #}
+    {% for table_model in view.get_matches %}
+		{% include "transactions/transactions_table.html" with model=table_model only %}
+        <br/><br/><br/>
+    {% endfor %}
+{% endblock %}

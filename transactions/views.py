@@ -1,11 +1,12 @@
 from django.shortcuts import render, redirect
 from django.http import HttpResponse, HttpResponseRedirect
-from django.views.generic import ListView
+from django.views.generic import ListView, TemplateView
 from django.db.models import Count
 from datetime import datetime
 from django.core.urlresolvers import reverse
 
 from transactions.models import Transaction
+from transactions.src.InternalTransferFinder import InternalTransferFinder
 from .forms import ImportForm, TransactionFilterForm, TransactionForm, ManualForm, BankAccountForm, AccountTemplateForm
 from .models import BankAccount, BankAccountTemplate
 from .src.import_transactions import import_transactions
@@ -114,47 +115,57 @@ def edit_account(request, id_=None):
         return redirect(reverse('accounts'))
 
 
-class TransactionsView(ListView):
+class TransactionsView(TemplateView):
     template_name="transactions/index.html"
 
     def __init__(self):
         self.pageSize = 50
-    
+
     def get_filter_form(self):
         return TransactionFilterForm(self.request.GET)
 
-    def get_queryset(self):
-        form = TransactionFilterForm(self.request.GET)
-        filtered = apply_filter(form)
-
-        if(form.is_paged()):
-            page = form.get_page()
-            start = (page-1)*self.pageSize
-            end = start + self.pageSize
-            filtered = filtered[start:end]
-        
-        return [[x, TransactionForm(prefix=x.id, instance=x)]
-                for x
-                in filtered]
+    def get_bulk_form(self):
+        return TransactionForm()
 
     def get_context_data(self, **kwargs):
         context = super(TransactionsView, self).get_context_data(**kwargs)
         form = TransactionFilterForm(self.request.GET)
-        accounts = form.get_account()
-        if accounts != None and len(accounts) == 1:
-            context['single_account'] = BankAccount.objects.get(pk=accounts[0])
-        else:
-            context['single_account'] = None
 
-        context['bulk_form'] = TransactionForm()
-        context['total_found'] = len(apply_filter(form))
+        filtered = apply_filter(form)
+        context['total_found'] = len(filtered)
+
+        if form.is_paged():
+            page = form.get_page()
+            start = (page - 1) * self.pageSize
+            end = start + self.pageSize
+            filtered = filtered[start:end]
+
+        accounts = form.get_account()
+        single_account = BankAccount.objects.get(pk=accounts[0])\
+            if accounts is not None and len(accounts) == 1\
+            else None
+        context['table_model'] = TransactionsTableModel(filtered, single_account)
+
         if form.is_paged():
             context['page'] = form.get_page()
             total_pages = math.ceil(context['total_found']/self.pageSize)
             context['pages'] = range(1, total_pages + 1)
         return context
 
-    
+
+class TransactionsTableModel:
+    def __init__(self, transactions, single_account=None, render_form=True):
+        self.render_form = render_form
+        self.rows = [TransactionsTableModel.Row(x, TransactionForm(prefix=x.id, instance=x))
+                             for x in transactions]
+        self.single_account = single_account
+
+    class Row:
+        def __init__(self, transaction, form):
+            self.form = form
+            self.transaction = transaction
+
+
 class TransactionsDownloadView(TransactionsView):
     template_name="transactions/download.html"
 
@@ -180,7 +191,7 @@ def save_labels(request):
 
 class PastImportsView(ListView):
     template_name="transactions/past-imports.html"
-    
+
     def get_filter_form(self):
         return TransactionFilterForm(self.request.GET)
 
@@ -207,3 +218,13 @@ def delete_past_import(request):
 
 def graph(request):
     return make_graph(request)
+
+
+class FindTransfersView(TemplateView):
+    template_name = "transactions/find-transfers.html"
+
+    def get_matches(self):
+        groups = InternalTransferFinder(Transaction.objects.all())\
+            .find()
+        return [TransactionsTableModel(x, render_form=False) for x in groups]
+

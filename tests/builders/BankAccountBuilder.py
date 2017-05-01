@@ -1,4 +1,4 @@
-from tests.builders.BankAccountTemplateBuilder import BankAccountTemplateBuilder
+from .BankAccountTemplateBuilder import BankAccountTemplateBuilder
 from transactions.models import BankAccount, BankAccountTemplate
 
 

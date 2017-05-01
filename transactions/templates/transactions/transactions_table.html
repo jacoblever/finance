@@ -1,0 +1,63 @@
+{% load useful_tags %}
+<table class="table">
+    <tr>
+        <th>Account</th>
+        <th>Date</th>
+        {% if model.single_account != None %}
+            {% if model.single_account.custom_date_1_name != None %}
+                <th>{{ model.single_account.custom_date_1_name }}</th>
+            {% endif %}
+            {% if model.single_account.custom_text_1_name != None %}
+                <th>{{ model.single_account.custom_text_1_name }}</th>
+            {% endif %}
+        {% endif %}
+        <th>Description</th>
+        <th>Amount</th>
+        <th>Label</th>
+        <th>Notes</th>
+    </tr>
+    {% for row in model.rows %}
+        <tr>
+            <td>
+                <input
+                    type="hidden"
+                    name="id"
+                    value="{{ row.transaction.id }}" />
+                {{ row.transaction.bank_account }}
+            </td>
+            <td>{{ row.transaction.date|nice_date }}</td>
+            {% if model.single_account != None %}
+                {% if model.single_account.custom_date_1_name != None %}
+                    <td>{{ row.transaction.custom_date_1|nice_date }}</td>
+                {% endif %}
+                {% if model.single_account.custom_text_1_name != None %}
+                    <td>{{ row.transaction.custom_text_1 }}</td>
+                {% endif %}
+            {% endif %}
+            <td>
+                {% if row.transaction.bank_account.id == -1 %}
+                    <a href="./manual/{{ row.transaction.id }}">
+                        {{ row.transaction.description }}
+                    </a>
+                {% else %}
+                    {{ row.transaction.description }}
+                {% endif %}
+            </td>
+            <td>{{ row.transaction.amount }}</td>
+            <td>
+                {% if model.render_form %}
+                    {{ row.form.transaction_label }}
+                {% else %}
+                    {{ row.transaction.transaction_label|not_none }}
+                {% endif %}
+            </td>
+            <td>
+                {% if model.render_form %}
+                    {{ row.form.notes }}
+                {% else %}
+                    {{ row.transaction.notes|not_none }}
+                {% endif %}
+            </td>
+        </tr>
+    {% endfor %}
+</table>

@@ -19,7 +19,7 @@
 	</form>
 	<ul class="filter-ul" bulk-form>
 		<li>Bulk Edit (this will change all the items below)</li>
-		{{ bulk_form.as_ul }}
+		{{ view.get_bulk_form.as_ul }}
 		<li><button reset-button>Reset</button></li>
 	</ul>
 	<form method="POST" action="./save-labels/" transactions-form>{% csrf_token %}
@@ -53,60 +53,7 @@
 				{% endif %}
 			</div>
 		</div>
-		<table class="table">
-	  		<tr>
-				<th>Account</th>
-				<th>Date</th>
-				{% if single_account != None %}
-					{% if single_account.custom_date_1_name != None %}
-						<th>{{ single_account.custom_date_1_name }}</th>
-					{% endif %}
-					{% if single_account.custom_text_1_name != None %}
-						<th>{{ single_account.custom_text_1_name }}</th>
-					{% endif %}
-				{% endif %}
-				<th>Description</th>
-				<th>Amount</th>
-				<th>Label</th>
-				<th>Notes</th>
-			</tr>
-			{% for transaction in object_list %}
-		  		<tr>
-					<td>
-						<input
-							type="hidden"
-							name="id"
-							value="{{ transaction.0.id }}" />
-						{{ transaction.0.bank_account }}
-					</td>
-					<td>{{ transaction.0.date|nice_date }}</td>
-					{% if single_account != None %}
-						{% if single_account.custom_date_1_name != None %}
-							<td>{{ transaction.0.custom_date_1|nice_date }}</td>
-						{% endif %}
-						{% if single_account.custom_text_1_name != None %}
-							<td>{{ transaction.0.custom_text_1 }}</td>
-						{% endif %}
-					{% endif %}
-					<td>
-						{% if transaction.0.bank_account.id == -1 %}
-							<a href="./manual/{{ transaction.0.id }}">
-								{{ transaction.0.description }}
-							</a>
-						{% else %}
-							{{ transaction.0.description }}
-						{% endif %}
-					</td>
-					<td>{{ transaction.0.amount }}</td>
-					<td>
-						{{ transaction.1.transaction_label }}
-					</td>
-					<td>
-						{{ transaction.1.notes }}
-					</td>
-				</tr>
-			{% endfor %}
-		</table>
+		{% include "transactions/transactions_table.html" with model=table_model only %}
 		<button type="submit">Save</button>
 	</form>
 	<script type="text/javascript" src="{% static 'transactions/index.js' %}"></script>

@@ -1,11 +1,10 @@
-from tests.test_framework import FinanceTestCase
-from tests.builders.BankAccountBuilder import *
-from tests.builders.ImportFileBuilder import *
+from tests import DatabaseBackedFinanceTestCase
+from tests.builders import BankAccountBuilder
+from tests.builders import ImportFileBuilder
 from transactions.src import import_transactions
-from transactions.models import Transaction
 
-class WhenImportingTheSameTransactionTwice(FinanceTestCase):
 
+class WhenImportingTheSameTransactionTwice(DatabaseBackedFinanceTestCase):
     def setUp(self):
         super().setUp()
         self.account_id = BankAccountBuilder().with_test_bank_account_template().build().id

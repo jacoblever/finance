@@ -1,11 +1,11 @@
-from tests.test_framework import FinanceTestCase
-from tests.builders.BankAccountBuilder import *
-from tests.builders.ImportFileBuilder import *
+from tests import DatabaseBackedFinanceTestCase
+from tests.builders import BankAccountBuilder
+from tests.builders import ImportFileBuilder
 from transactions.src import import_transactions
 from transactions.models import Transaction
 
-class WhenImportingTransactions(FinanceTestCase):
 
+class WhenImportingTransactions(DatabaseBackedFinanceTestCase):
     def setUp(self):
         super().setUp()
         self.account_id = BankAccountBuilder().with_test_bank_account_template().build().id
@@ -63,13 +63,13 @@ class WhenImportingTransactions(FinanceTestCase):
             property(self.import_file.transactions[0]),
             property(Transaction.objects.all()[0]))
 
-    # def test_isupper(self):
-    #     self.assertTrue('FOO'.isupper())
-    #     self.assertFalse('Foo'.isupper())
-    #
-    # def test_split(self):
-    #     s = 'hello world'
-    #     self.assertEqual(s.split(), ['hello', 'world'])
-    #     # check that s.split fails when the separator is not a string
-    #     with self.assertRaises(TypeError):
-    #         s.split(2)
+        # def test_isupper(self):
+        #     self.assertTrue('FOO'.isupper())
+        #     self.assertFalse('Foo'.isupper())
+        #
+        # def test_split(self):
+        #     s = 'hello world'
+        #     self.assertEqual(s.split(), ['hello', 'world'])
+        #     # check that s.split fails when the separator is not a string
+        #     with self.assertRaises(TypeError):
+        #         s.split(2)

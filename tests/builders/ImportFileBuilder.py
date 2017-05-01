@@ -1,8 +1,8 @@
 import os
 import uuid
 
-from tests.builders.TransactionBuilder import *
-from tests.builders.BankAccountTemplateBuilder import *
+from .TransactionBuilder import TransactionBuilder
+from .BankAccountTemplateBuilder import BankAccountTemplateBuilder
 
 
 class ImportFile:

@@ -3,7 +3,7 @@ from django.views.generic import ListView
 
 from transactions.models import BankAccount, TransactionLabel
 from transactions.forms import TransactionForm
-from transactions.views import TransactionsView, TransactionsDownloadView, PastImportsView
+from transactions.views import TransactionsView, TransactionsDownloadView, PastImportsView, FindTransfersView
 
 from . import views
 
@@ -22,5 +22,6 @@ urlpatterns = [
     url(r'^graph/$', ListView.as_view(queryset=TransactionLabel.objects.all(),
                                 template_name="transactions/graph2.html")),
     url(r'^past-imports/$', PastImportsView.as_view()),
-    url(r'^past-imports/delete/$', views.delete_past_import)
+    url(r'^past-imports/delete/$', views.delete_past_import),
+    url(r'^find-transfers/$', FindTransfersView.as_view())
 ]
