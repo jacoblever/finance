@@ -4,10 +4,7 @@ from decimal import Decimal
 
 from tests.builders import TransactionBuilder
 from transactions.models import BankAccount, TransactionLabel, BankAccountTemplate, Transaction
-should_continue = input("This will delete all data in your system and replace it with randon sample data!"
-                        "Are you sure you want to do this? (yes/no)")
-if should_continue != 'yes':
-    exit()
+
 current_account = BankAccount()
 current_account.name = 'Current Account'
 current_account.account_type = 'CurrentAccount'

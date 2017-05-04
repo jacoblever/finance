@@ -1,5 +1,5 @@
 **/__pycache__/*
-db.sqlite3
+data/*
 transactions/migrations/0001_initial.py
 .idea/*
 **/*.pyc
