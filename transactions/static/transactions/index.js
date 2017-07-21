@@ -55,7 +55,7 @@ $('button[reset-button]').click(function(event) {
 
 $transactionsForm.submit(function() {
 
-    $("body").append("<div class='saving-overlay'>Saving...</div>");
+    var overlay = global.startLongAction("Saving...");
 
     var data = $transactionsForm.find('input[name=csrfmiddlewaretoken]').serializeArray()
 
@@ -79,6 +79,7 @@ $transactionsForm.submit(function() {
         var endTime = performance.now();
         console.log('Saved taking ' + (endTime-startTime)/1000 + ' ms.');
         console.log('Reloading...');
+        overlay.done();
         setTimeout(function(){
             // It's safe to repload now
             window.onbeforeunload = null;
