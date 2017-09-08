@@ -49,7 +49,7 @@ def create_transactions(account, quantity, labels):
             builder.with_random_notes()
         if i % 5 == 0 or i % 5 == 1 or i % 5 == 2:
             builder.with_transaction_label(random.choice(labels))
-        transactions.append(builder.build(persist=False))
+        transactions.append(builder.build())
         i += 1
     Transaction.objects.bulk_create(transactions)
 
@@ -66,7 +66,7 @@ def create_transfer_transaction(account1, account2, amount, labels):
         builder1.with_random_notes()
     if random.randrange(3) == 1:
         builder1.with_transaction_label(random.choice(labels))
-    first = builder1.build(persist=False)
+    first = builder1.build()
     yield first
     builder2 = TransactionBuilder() \
         .for_bank_account(account2) \
@@ -76,7 +76,7 @@ def create_transfer_transaction(account1, account2, amount, labels):
         builder2.with_random_notes()
     if random.randrange(3) == 1:
         builder2.with_transaction_label(random.choice(labels))
-    yield builder2.build(persist=False)
+    yield builder2.build()
 
 
 def random_decimal():

@@ -2,6 +2,7 @@ from transactions.models import BankAccountTemplate
 
 
 class BankAccountTemplateBuilder:
+    next_static_id = 1
 
     def __init__(self):
         self.template = BankAccountTemplate()
@@ -16,8 +17,12 @@ class BankAccountTemplateBuilder:
         self.template.custom_text_1_name = "Custom Text 1"
         self.template.get_custom_text_1 = "row['CustomText1']"
 
-    def build(self):
-        self.template.save()
+    def build(self, persist=False):
+        if persist:
+            self.template.save()
+        else:
+            self.template.id = BankAccountTemplateBuilder.next_static_id
+            BankAccountTemplateBuilder.next_static_id += 1
         print("BankAccountTemplateBuilder: Created test bank account template with id "
               + str(self.template.id))
         return self.template

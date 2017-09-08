@@ -14,15 +14,15 @@ class InternalTransferFinderTests:
                 TransactionBuilder()
                     .with_date(date)
                     .with_amount(10)
-                    .build(persist=False),
+                    .build(),
                 TransactionBuilder()
                     .with_date(date)
                     .with_amount(-10.00)
-                    .build(persist=False),
+                    .build(),
                 TransactionBuilder()
                     .with_date(date)
                     .with_amount(11.01)
-                    .build(persist=False)
+                    .build()
             ]
             self.matches = InternalTransferFinder(transactions).find()
 
@@ -45,11 +45,11 @@ class InternalTransferFinderTests:
                 TransactionBuilder()
                     .with_date(datetime.strptime("30/04/17", '%d/%m/%y'))
                     .with_amount(10.01)
-                    .build(persist=False),
+                    .build(),
                 TransactionBuilder()
                     .with_date(datetime.strptime("29/04/17", '%d/%m/%y'))
                     .with_amount(-10.01)
-                    .build(persist=False)
+                    .build()
             ]
             self.matches = InternalTransferFinder(transactions).find()
 
@@ -63,11 +63,11 @@ class InternalTransferFinderTests:
                 TransactionBuilder()
                     .with_date(datetime.strptime("30/04/17", '%d/%m/%y'))
                     .with_amount(10.01)
-                    .build(persist=False),
+                    .build(),
                 TransactionBuilder()
                     .with_date(datetime.strptime("30/04/17", '%d/%m/%y'))
                     .with_amount(-10.02)
-                    .build(persist=False)
+                    .build()
             ]
             self.matches = InternalTransferFinder(transactions).find()
 
@@ -81,11 +81,11 @@ class InternalTransferFinderTests:
                 TransactionBuilder()
                     .with_date(datetime.strptime("30/04/17", '%d/%m/%y'))
                     .with_amount(10.01)
-                    .build(persist=False),
+                    .build(),
                 TransactionBuilder()
                     .with_date(datetime.strptime("30/04/17", '%d/%m/%y'))
                     .with_amount(10.01)
-                    .build(persist=False)
+                    .build()
             ]
             self.matches = InternalTransferFinder(transactions).find()
 

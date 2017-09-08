@@ -8,7 +8,7 @@ from transactions.models import Transaction
 class WhenImportingTransactions(DatabaseBackedFinanceTestCase):
     def setUp(self):
         super().setUp()
-        self.account_id = BankAccountBuilder().with_test_bank_account_template().build().id
+        self.account_id = BankAccountBuilder().with_test_bank_account_template().build(persist=True).id
         self.import_file = ImportFileBuilder().build()
 
         self.import_result = import_transactions.import_transactions_core(

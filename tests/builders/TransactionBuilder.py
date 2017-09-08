@@ -39,7 +39,7 @@ class TransactionBuilder:
         self.transaction.bank_account = bank_account
         return self
 
-    def build(self, persist=True):
+    def build(self, persist=False):
         if persist:
             assert self.transaction.bank_account is not None
             assert self.transaction.transaction_label is None\

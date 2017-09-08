@@ -3,6 +3,7 @@ from transactions.models import BankAccount, BankAccountTemplate
 
 
 class BankAccountBuilder:
+    next_static_id = 1
 
     def __init__(self):
         self.account = BankAccount()
@@ -20,11 +21,15 @@ class BankAccountBuilder:
         self.useTemplateBuilder = True
         return self
 
-    def build(self):
+    def build(self, persist=False):
         if self.useTemplateBuilder:
             builder = BankAccountTemplateBuilder()
-            self.account.bank_account_template = builder.build()
+            self.account.bank_account_template = builder.build(persist)
         assert self.account.bank_account_template != None
-        self.account.save()
+        if persist:
+            self.account.save()
+        else:
+            self.account.id = BankAccountBuilder.next_static_id
+            BankAccountBuilder.next_static_id += 1
         print("BankAccountBuilder: Created test bank account with id "+ str(self.account.id))
         return self.account

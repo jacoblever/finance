@@ -7,7 +7,7 @@ from transactions.src import import_transactions
 class WhenImportingTheSameTransactionTwice(DatabaseBackedFinanceTestCase):
     def setUp(self):
         super().setUp()
-        self.account_id = BankAccountBuilder().with_test_bank_account_template().build().id
+        self.account_id = BankAccountBuilder().with_test_bank_account_template().build(persist=True).id
         self.import_file = ImportFileBuilder().build()
 
         import_transactions.import_transactions_core(

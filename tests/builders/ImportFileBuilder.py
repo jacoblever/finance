@@ -29,7 +29,7 @@ class ImportFileBuilder:
         transactions = []
         i = 0
         while i < self.count:
-            transactions.append(TransactionBuilder().build(persist=False))
+            transactions.append(TransactionBuilder().build())
             i += 1
         BankAccountTemplateBuilder.write_transactions_to_file(self.file_name, transactions)
         print("ImportFileBuilder: Created test file with "
