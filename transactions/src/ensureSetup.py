@@ -25,12 +25,12 @@ manual_template.save()
 halifax = get_built_in_item(BankAccountTemplate, -2)
 halifax.name = "Halifax"
 halifax.is_built_in = True
-halifax.get_date = "datetime.strptime(row['Date'], '%d/%m/%y')"
+halifax.get_date = "datetime.strptime(row['Date'], '%d/%m/%Y')"
 halifax.get_description = "row['Description']"
 halifax.get_amount = "-float(row['Amount'])"
 halifax.get_current_balance = "None"
 halifax.custom_date_1_name = "Date entered"
-halifax.get_custom_date_1 = "datetime.strptime(row['Date entered'], '%d/%m/%y')"
+halifax.get_custom_date_1 = "datetime.strptime(row['Date entered'], '%d/%m/%Y')"
 halifax.custom_text_1_name = "Reference"
 halifax.get_custom_text_1 = "row['Reference']"
 halifax.save()
