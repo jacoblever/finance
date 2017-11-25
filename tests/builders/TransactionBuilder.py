@@ -1,3 +1,4 @@
+import logging
 import random
 from decimal import Decimal
 from datetime import datetime
@@ -48,7 +49,7 @@ class TransactionBuilder:
         else:
             self.transaction.id = TransactionBuilder.next_static_id
             TransactionBuilder.next_static_id += 1
-        print("TransactionBuilder: Created test transaction with id " + str(self.transaction.id))
+        logging.getLogger(__name__).info("TransactionBuilder: Created test transaction with id " + str(self.transaction.id))
         return self.transaction
 
     def __random_string__(self):

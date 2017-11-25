@@ -1,5 +1,6 @@
 **/__pycache__/*
 data/*
+logs/*
 transactions/migrations/0001_initial.py
 .idea/*
 **/*.pyc

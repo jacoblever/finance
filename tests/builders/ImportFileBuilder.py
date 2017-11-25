@@ -1,3 +1,4 @@
+import logging
 import os
 import uuid
 
@@ -32,6 +33,6 @@ class ImportFileBuilder:
             transactions.append(TransactionBuilder().build())
             i += 1
         BankAccountTemplateBuilder.write_transactions_to_file(self.file_name, transactions)
-        print("ImportFileBuilder: Created test file with "
+        logging.getLogger(__name__).info("ImportFileBuilder: Created test file with "
               + str(self.count) + " transaction(s)")
         return ImportFile(self.file_name, transactions)

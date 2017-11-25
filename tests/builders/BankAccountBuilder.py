@@ -1,3 +1,4 @@
+import logging
 from .BankAccountTemplateBuilder import BankAccountTemplateBuilder
 from transactions.models import BankAccount, BankAccountTemplate
 
@@ -31,5 +32,5 @@ class BankAccountBuilder:
         else:
             self.account.id = BankAccountBuilder.next_static_id
             BankAccountBuilder.next_static_id += 1
-        print("BankAccountBuilder: Created test bank account with id "+ str(self.account.id))
+        logging.getLogger(__name__).info("BankAccountBuilder: Created test bank account with id "+ str(self.account.id))
         return self.account

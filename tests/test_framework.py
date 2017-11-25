@@ -1,3 +1,4 @@
+import logging
 import unittest
 
 from django.test.utils import setup_test_environment, teardown_test_environment
@@ -10,12 +11,12 @@ class FinanceTestCase(unittest.TestCase):
         self.verbosity = 1
 
     def setUp(self):
+        logging.getLogger(__name__).info('%s: set up', type(self).__name__)
         setup_test_environment()
-        # So calls to print appear on a new line
-        print("")
 
     def tearDown(self):
         teardown_test_environment()
+        logging.getLogger(__name__).info('%s: teared down', type(self).__name__)
 
 
 class DatabaseBackedFinanceTestCase(FinanceTestCase):

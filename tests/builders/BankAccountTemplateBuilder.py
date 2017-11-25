@@ -1,3 +1,5 @@
+import logging
+
 from transactions.models import BankAccountTemplate
 
 
@@ -23,7 +25,7 @@ class BankAccountTemplateBuilder:
         else:
             self.template.id = BankAccountTemplateBuilder.next_static_id
             BankAccountTemplateBuilder.next_static_id += 1
-        print("BankAccountTemplateBuilder: Created test bank account template with id "
+        logging.getLogger(__name__).info("BankAccountTemplateBuilder: Created test bank account template with id "
               + str(self.template.id))
         return self.template
 
