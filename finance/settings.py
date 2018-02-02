@@ -75,7 +75,7 @@ WSGI_APPLICATION = 'finance.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/1.10/ref/settings/#databases
 if not os.environ.__contains__('FINANCE_DATABASE_NAME'):
-    exit("The FINANCE_DATABASE_NAME envioment variable must be set")
+    exit("The FINANCE_DATABASE_NAME environment variable must be set")
 
 database_name = os.environ['FINANCE_DATABASE_NAME']
 
