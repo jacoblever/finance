@@ -1,6 +1,6 @@
 from tests import DatabaseBackedFinanceTestCase
 from tests.builders import BankAccountBuilder
-from tests.builders import ImportFileBuilder
+from tests.builders import TransactionFileBuilder
 from transactions.src import import_transactions
 
 
@@ -8,7 +8,9 @@ class WhenImportingTheSameTransactionTwice(DatabaseBackedFinanceTestCase):
     def setUp(self):
         super().setUp()
         self.account_id = BankAccountBuilder().with_test_bank_account_template().build(persist=True).id
-        self.import_file = ImportFileBuilder().build()
+        self.import_file = TransactionFileBuilder().for_import()\
+            .with_random_transactions(count=1)\
+            .build()
 
         import_transactions.import_transactions_core(
             self.import_file.open(),
@@ -21,7 +23,7 @@ class WhenImportingTheSameTransactionTwice(DatabaseBackedFinanceTestCase):
             actually_import=False)
 
     def tearDown(self):
-        self.import_file.delete_file()
+        self.import_file.delete()
         super().tearDown()
 
     def test_that_one_transaction_is_found(self):

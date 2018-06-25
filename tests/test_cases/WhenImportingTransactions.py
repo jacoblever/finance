@@ -1,6 +1,7 @@
 from tests import DatabaseBackedFinanceTestCase
 from tests.builders import BankAccountBuilder
-from tests.builders import ImportFileBuilder
+from tests.builders import TransactionFileBuilder
+from tests.builders import TransactionBuilder
 from transactions.src import import_transactions
 from transactions.models import Transaction
 
@@ -9,7 +10,10 @@ class WhenImportingTransactions(DatabaseBackedFinanceTestCase):
     def setUp(self):
         super().setUp()
         self.account_id = BankAccountBuilder().with_test_bank_account_template().build(persist=True).id
-        self.import_file = ImportFileBuilder().build()
+        self.transaction = TransactionBuilder().build(persist=True)
+        self.import_file = TransactionFileBuilder.for_import()\
+            .with_transactions([self.transaction])\
+            .build(persist_to_file=True)
 
         self.import_result = import_transactions.import_transactions_core(
             self.import_file.open(),
@@ -17,7 +21,7 @@ class WhenImportingTransactions(DatabaseBackedFinanceTestCase):
             actually_import=True)
 
     def tearDown(self):
-        self.import_file.delete_file()
+        self.import_file.delete()
         super().tearDown()
 
     def test_that_one_transaction_is_found(self):
@@ -60,5 +64,5 @@ class WhenImportingTransactions(DatabaseBackedFinanceTestCase):
 
     def assertPropertyEqual(self, property):
         self.assertEqual(
-            property(self.import_file.transactions[0]),
+            property(self.transactions[0]),
             property(Transaction.objects.all()[0]))

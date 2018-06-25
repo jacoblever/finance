@@ -9,7 +9,7 @@ from . import views
 
 urlpatterns = [
     url(r'^$', TransactionsView.as_view(), name='home'),
-    url(r'^download/$', TransactionsDownloadView.as_view()),
+    url(r'^download/$', TransactionsDownloadView.as_view(), name='download'),
     url(r'^save-labels/$', views.save_labels),
     url(r'^accounts/$', ListView.as_view(queryset=BankAccount.objects.all().filter(id__gt=0),
                                 template_name="transactions/accounts.html"), name='accounts'),

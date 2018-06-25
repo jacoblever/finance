@@ -15,3 +15,7 @@ def not_none(value):
 def nice_date(value):
     return defaultfilters.date(value, "d M Y")
 
+@register.filter
+def excel_date(value):
+    return defaultfilters.date(value, "d/m/y")
+

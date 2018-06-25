@@ -1,4 +1,4 @@
 from .BankAccountBuilder import BankAccountBuilder
 from .BankAccountTemplateBuilder import BankAccountTemplateBuilder
-from .ImportFileBuilder import ImportFileBuilder
+from .TransactionFileBuilder import TransactionFileBuilder
 from .TransactionBuilder import TransactionBuilder
